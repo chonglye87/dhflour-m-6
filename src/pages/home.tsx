@@ -14,9 +14,11 @@ const metadata = {
 
 export default function Page() {
   const router = useRouter();
+
   useEffect(() => {
     router.push(paths.dashboard.root);
-  }, []);
+  }, [router]);
+
   return (
     <>
       <Helmet>
