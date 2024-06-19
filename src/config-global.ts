@@ -9,6 +9,7 @@ export type ConfigValue = {
     name: string;
     serverUrl: string;
     assetURL: string;
+    apiURL: string;
     basePath: string;
     version: string;
   };
@@ -16,6 +17,8 @@ export type ConfigValue = {
     method: 'jwt' | 'amplify' | 'firebase' | 'supabase' | 'auth0';
     skip: boolean;
     redirectPath: string;
+    accessTokenName: string;
+    refreshTokenName: string;
   };
   mapbox: {
     apiKey: string;
@@ -41,6 +44,7 @@ export const CONFIG: ConfigValue = {
     name: 'Minimals',
     serverUrl: import.meta.env.VITE_SERVER_URL ?? '',
     assetURL: import.meta.env.VITE_ASSET_URL ?? '',
+    apiURL: import.meta.env.VITE_API_URL ?? '',
     basePath: import.meta.env.VITE_BASE_PATH ?? '',
     version: packageJson.version,
   },

@@ -17,7 +17,8 @@
     "re:start": "yarn rm:all && yarn install && yarn dev",
     "re:build": "yarn rm:all && yarn install && yarn build",
     "re:build-npm": "npm run rm:all && npm install && npm run build",
-    "dev:host": "vite --host"
+    "dev:host": "vite --host",
+    "api-build": "npx swagger-typescript-api -p http://localhost:8080/api-docs -o ./src/generated/swagger -n swagger.api.ts --axios"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",
@@ -74,6 +75,7 @@
     "i18next": "^23.11.5",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-resources-to-backend": "^1.2.1",
+    "js-cookie": "^3.0.5",
     "lowlight": "^3.1.0",
     "mapbox-gl": "^3.4.0",
     "mui-one-time-password-input": "^2.0.2",
@@ -107,6 +109,7 @@
   },
   "devDependencies": {
     "@types/autosuggest-highlight": "^3.2.3",
+    "@types/js-cookie": "^3.0.6",
     "@types/mapbox-gl": "^3.1.0",
     "@types/node": "^20.14.2",
     "@types/nprogress": "^0.2.3",
@@ -131,6 +134,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-unused-imports": "^3.2.0",
     "prettier": "^3.3.2",
+    "swagger-typescript-api": "^13.0.6",
     "typescript": "^5.4.5",
     "vite": "^5.3.0",
     "vite-plugin-checker": "^0.6.4"

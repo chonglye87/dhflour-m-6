@@ -30,7 +30,7 @@ export function Gradient() {
             ),
           }}
         >
-          Minimals UI
+          관리 페이지 샘플
         </Box>
       </ComponentBlock>
 

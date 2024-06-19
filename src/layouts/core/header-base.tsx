@@ -15,7 +15,6 @@ import { Searchbar } from '../components/searchbar';
 import { MenuButton } from '../components/menu-button';
 import { SignInButton } from '../components/sign-in-button';
 import { AccountDrawer } from '../components/account-drawer';
-import { SettingsButton } from '../components/settings-button';
 import { LanguagePopover } from '../components/language-popover';
 import { ContactsPopover } from '../components/contacts-popover';
 import { WorkspacesPopover } from '../components/workspaces-popover';
@@ -165,7 +164,7 @@ export function HeaderBase({
                   color="inherit"
                   sx={{ typography: 'subtitle2' }}
                 >
-                  Need help?
+                  도움말
                 </Link>
               )}
 
@@ -184,7 +183,7 @@ export function HeaderBase({
               {contacts && <ContactsPopover data-slot="contacts" data={data?.contacts} />}
 
               {/* -- Settings button -- */}
-              {settings && <SettingsButton data-slot="settings" />}
+              {/* {settings && <SettingsButton data-slot="settings" />} */}
 
               {/* -- Account drawer -- */}
               {account && <AccountDrawer data-slot="account" data={data?.account} />}
