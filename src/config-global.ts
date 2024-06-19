@@ -56,6 +56,8 @@ export const CONFIG: ConfigValue = {
     method: 'jwt',
     skip: false,
     redirectPath: paths.dashboard.root,
+    accessTokenName: 'access-token',
+    refreshTokenName: 'refresh-token',
   },
   /**
    * Mapbox
