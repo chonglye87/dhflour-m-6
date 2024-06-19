@@ -1,6 +1,8 @@
+import {useEffect} from "react";
 import { Helmet } from 'react-helmet-async';
 
-import { HomeView } from 'src/sections/home/view';
+import {paths} from "../routes/paths";
+import {useRouter} from "../routes/hooks";
 
 // ----------------------------------------------------------------------
 
@@ -11,6 +13,10 @@ const metadata = {
 };
 
 export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.push(paths.dashboard.root);
+  }, []);
   return (
     <>
       <Helmet>
@@ -18,7 +24,7 @@ export default function Page() {
         <meta name="description" content={metadata.description} />
       </Helmet>
 
-      <HomeView />
+      {/* <HomeView /> */}
     </>
   );
 }
