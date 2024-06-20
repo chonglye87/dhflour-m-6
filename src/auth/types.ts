@@ -1,12 +1,13 @@
-export type UserType = Record<string, any> | null;
+import type {RUser} from "../generated/swagger/swagger.api";
+
 
 export type AuthState = {
-  user: UserType;
+  user: RUser | null;
   loading: boolean;
 };
 
 export type AuthContextValue = {
-  user: UserType;
+  user: RUser | null;
   loading: boolean;
   authenticated: boolean;
   unauthenticated: boolean;

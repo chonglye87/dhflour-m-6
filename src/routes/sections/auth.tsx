@@ -24,7 +24,7 @@ const authJwt = {
       path: 'sign-in',
       element: (
         <GuestGuard>
-          <AuthSplitLayout section={{ title: 'ooo 웹사이트' }}>
+          <AuthSplitLayout section={{ title: '안녕하세요! 시작해볼까요?' }}>
             <Jwt.SignInPage />
           </AuthSplitLayout>
         </GuestGuard>

@@ -45,7 +45,7 @@ export function Section({
         px: 3,
         pb: 3,
         width: 1,
-        maxWidth: 480,
+        maxWidth: 800,
         display: 'none',
         position: 'relative',
         pt: 'var(--layout-header-desktop-height)',

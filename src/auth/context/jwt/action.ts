@@ -1,7 +1,10 @@
-import axios, { endpoints } from 'src/utils/axios';
+import {Swagger} from 'src/utils/API';
+import axios, {endpoints} from 'src/utils/axios';
 
-import { setSession } from './utils';
-import { STORAGE_KEY } from './constant';
+import {setSession} from './utils';
+import {STORAGE_KEY} from './constant';
+import {customError} from "../../../utils/error";
+import {setAccessToken} from "../../../utils/auth";
 
 // ----------------------------------------------------------------------
 
@@ -17,25 +20,31 @@ export type SignUpParams = {
   lastName: string;
 };
 
+
 /** **************************************
  * Sign in
  *************************************** */
-export const signInWithPassword = async ({ email, password }: SignInParams): Promise<void> => {
+export const signInWithPassword = async ({email, password}: SignInParams): Promise<void> => {
   try {
-    const params = { email, password };
+    const data = {
+      email,
+      password,
+    };
+    const response = await Swagger.api.authAccessToken(data)
 
-    const res = await axios.post(endpoints.auth.signIn, params);
+    const {accessToken} = response.data;
 
-    const { accessToken } = res.data;
+    // 토큰 담기
+    setAccessToken(accessToken);
 
     if (!accessToken) {
       throw new Error('Access token not found in response');
     }
 
-    setSession(accessToken);
   } catch (error) {
     console.error('Error during sign in:', error);
-    throw error;
+    throw customError(error);
+    // throw error;
   }
 };
 
@@ -43,11 +52,11 @@ export const signInWithPassword = async ({ email, password }: SignInParams): Pro
  * Sign up
  *************************************** */
 export const signUp = async ({
-  email,
-  password,
-  firstName,
-  lastName,
-}: SignUpParams): Promise<void> => {
+                               email,
+                               password,
+                               firstName,
+                               lastName,
+                             }: SignUpParams): Promise<void> => {
   const params = {
     email,
     password,
@@ -58,7 +67,7 @@ export const signUp = async ({
   try {
     const res = await axios.post(endpoints.auth.signUp, params);
 
-    const { accessToken } = res.data;
+    const {accessToken} = res.data;
 
     if (!accessToken) {
       throw new Error('Access token not found in response');

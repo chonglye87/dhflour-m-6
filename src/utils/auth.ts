@@ -5,7 +5,7 @@ import {Axios} from "./API";
 import {CONFIG} from "../config-global";
 // ----------------------------------------------------------------------
 
-// get token
+// 토큰 가져오기
 export function getAccessToken() {
   return Cookies.get(CONFIG.auth.accessTokenName as string);
 }
@@ -14,8 +14,9 @@ export function getRefreshToken() {
   return Cookies.get(CONFIG.auth.refreshTokenName as string);
 }
 
-// 토큰 설정
+// 토큰 저정하기
 export function setAccessToken(accessToken: string | null) {
+  console.log('accessToken',accessToken)
   if (accessToken) {
     Cookies.set(
       CONFIG.auth.accessTokenName as string,
