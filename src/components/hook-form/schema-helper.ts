@@ -22,7 +22,7 @@ export const schemaHelper = {
   phoneNumber: (props?: InputProps) =>
     zod
       .string()
-      .min(1, { message: props?.message?.required_error ?? 'Phone number is required!' })
+      .min(1, { message: props?.message?.required_error ?? '' })
       .refine((data) => props?.isValidPhoneNumber?.(data), {
         message: props?.message?.invalid_type_error ?? 'Invalid phone number!',
       }),

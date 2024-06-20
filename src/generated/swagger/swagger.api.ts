@@ -9,8 +9,64 @@
  * ---------------------------------------------------------------
  */
 
-export interface RefreshTokenRequest {
-  refreshToken?: string;
+export interface RequestRBoard {
+  /**
+   * 제목
+   * @maxLength 255
+   */
+  title: string;
+  /** 내용 */
+  content?: string;
+}
+
+export interface RequestRBoardCategory {
+  /**
+   * 카테고리명
+   * @example "공지"
+   */
+  name: string;
+}
+
+export interface RequestSignUp {
+  /**
+   * 이메일
+   * @maxLength 255
+   * @example "test@gmail.com"
+   */
+  email: string;
+  /**
+   * 사용자명
+   * @maxLength 255
+   * @example "홍길동"
+   */
+  username: string;
+  /**
+   * 휴대폰번호
+   * @maxLength 255
+   * @example "01011112222"
+   */
+  mobile: string;
+  /**
+   * 비밀번호
+   * @maxLength 255
+   * @example "Yuio1234!"
+   */
+  password: string;
+  /**
+   * 이용약관동의 여부
+   * @example true
+   */
+  policy: boolean;
+  /**
+   * 개인정보처리방침동의 여부
+   * @example true
+   */
+  privacy: boolean;
+  /**
+   * 마케팅수신동의 여부
+   * @example true
+   */
+  marketing?: boolean;
 }
 
 export interface AuthenticationResponse {
@@ -28,6 +84,31 @@ export interface AuthenticationResponse {
 }
 
 export interface RUser {
+  /**
+   * 등록시간
+   * @format date-time
+   */
+  createdAt: string;
+  /**
+   * 등록자
+   * @format int64
+   */
+  createdBy: number;
+  /**
+   * 수정시간
+   * @format date-time
+   */
+  updatedAt: string;
+  /**
+   * 수정자
+   * @format int64
+   */
+  updatedBy: number;
+  /**
+   * 버전
+   * @format int64
+   */
+  version: number;
   /** @format int64 */
   id?: number;
   /**
@@ -60,16 +141,43 @@ export interface RUser {
    * @example true
    */
   marketing?: boolean;
+}
+
+export interface RBoard {
   /**
    * 등록시간
    * @format date-time
    */
-  createdAt?: string;
+  createdAt: string;
+  /**
+   * 등록자
+   * @format int64
+   */
+  createdBy: number;
   /**
    * 수정시간
    * @format date-time
    */
-  updatedAt?: string;
+  updatedAt: string;
+  /**
+   * 수정자
+   * @format int64
+   */
+  updatedBy: number;
+  /**
+   * 버전
+   * @format int64
+   */
+  version: number;
+  /** @format int64 */
+  id?: number;
+  /** 버전 */
+  title: string;
+  content?: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken?: string;
 }
 
 export interface AuthenticationRequest {
@@ -89,6 +197,68 @@ export interface UserSampleBody {
   /** @format int64 */
   id?: number;
   username?: string;
+}
+
+export interface RBoardCategory {
+  /**
+   * 등록시간
+   * @format date-time
+   */
+  createdAt: string;
+  /**
+   * 등록자
+   * @format int64
+   */
+  createdBy: number;
+  /**
+   * 수정시간
+   * @format date-time
+   */
+  updatedAt: string;
+  /**
+   * 수정자
+   * @format int64
+   */
+  updatedBy: number;
+  /**
+   * 버전
+   * @format int64
+   */
+  version: number;
+  /** @format int64 */
+  id?: number;
+  /** 카테고리명 */
+  name: string;
+}
+
+/** 게시판 페이지네이션 응답 */
+export interface BoardPaginationResponse {
+  /**
+   * 현재 페이지 번호
+   * @format int32
+   * @example 0
+   */
+  page?: number;
+  /**
+   * 페이지 크기
+   * @format int32
+   * @example 20
+   */
+  size?: number;
+  /**
+   * 전체 요소 수
+   * @format int64
+   * @example 100
+   */
+  totalElements?: number;
+  /**
+   * 전체 페이지 수
+   * @format int32
+   * @example 5
+   */
+  totalPages?: number;
+  /** 페이지에 포함된 콘텐츠 */
+  content?: RBoard[];
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -245,6 +415,244 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   api = {
+    /**
+     * @description 게시판를 ID로 조회합니다.
+     *
+     * @tags 게시판 API
+     * @name GetBoardById
+     * @summary [board-2] 게시판 상세 조회 (Get by ID)
+     * @request GET:/api/v1/board/{id}
+     * @secure
+     */
+    getBoardById: (id: number, params: RequestParams = {}) =>
+      this.request<RBoard, any>({
+        path: `/api/v1/board/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 게시판를 수정합니다.
+     *
+     * @tags 게시판 API
+     * @name UpdateBoard
+     * @summary [board-4] 게시판 수정 (Update)
+     * @request PUT:/api/v1/board/{id}
+     * @secure
+     */
+    updateBoard: (id: number, data: RequestRBoard, params: RequestParams = {}) =>
+      this.request<RequestRBoard, any>({
+        path: `/api/v1/board/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 게시판를 삭제합니다.
+     *
+     * @tags 게시판 API
+     * @name DeleteBoard
+     * @summary [board-5] 게시판 삭제 (Delete)
+     * @request DELETE:/api/v1/board/{id}
+     * @secure
+     */
+    deleteBoard: (id: number, params: RequestParams = {}) =>
+      this.request<object, any>({
+        path: `/api/v1/board/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 게시물 카테고리를 ID로 조회합니다.
+     *
+     * @tags 게시판 API
+     * @name GetBoardCategoryById
+     * @summary [board-category-2] 게시판 카테고리 상세 조회 (Get by ID)
+     * @request GET:/api/v1/board-category/{id}
+     * @secure
+     */
+    getBoardCategoryById: (id: number, params: RequestParams = {}) =>
+      this.request<RBoardCategory, any>({
+        path: `/api/v1/board-category/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 게시물 카테고리를 수정합니다.
+     *
+     * @tags 게시판 API
+     * @name UpdateBoardCategory
+     * @summary [board-category-4] 게시판 카테고리 수정 (Update)
+     * @request PUT:/api/v1/board-category/{id}
+     * @secure
+     */
+    updateBoardCategory: (id: number, data: RequestRBoardCategory, params: RequestParams = {}) =>
+      this.request<RequestRBoardCategory, any>({
+        path: `/api/v1/board-category/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 게시물 카테고리를 삭제합니다.
+     *
+     * @tags 게시판 API
+     * @name DeleteBoardCategory
+     * @summary [board-category-5] 게시판 카테고리 삭제 (Delete)
+     * @request DELETE:/api/v1/board-category/{id}
+     * @secure
+     */
+    deleteBoardCategory: (id: number, params: RequestParams = {}) =>
+      this.request<object, any>({
+        path: `/api/v1/board-category/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 회원가입을 합니다.
+     *
+     * @tags 회원 API
+     * @name SignUp
+     * @summary [user-1] 회원가입 (Sign Up)
+     * @request POST:/api/v1/user
+     */
+    signUp: (data: RequestSignUp, params: RequestParams = {}) =>
+      this.request<AuthenticationResponse, any>({
+        path: `/api/v1/user`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 게시물 카테고리 목록 조회합니다.
+     *
+     * @tags 게시판 API
+     * @name ListBoardCategory
+     * @summary [board-category-1] 게시판 카테고리 목록 조회 (List)
+     * @request GET:/api/v1/board-category
+     * @secure
+     */
+    listBoardCategory: (
+      query?: {
+        /**
+         * 정렬 (Sort Page)
+         * @example "created_at,desc"
+         */
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<BoardPaginationResponse, any>({
+        path: `/api/v1/board-category`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 새로운 게시물 카테고리를 생성합니다.
+     *
+     * @tags 게시판 API
+     * @name CreateBoardCategory
+     * @summary [board-category-3] 게시판 카테고리 생성 (Create)
+     * @request POST:/api/v1/board-category
+     * @secure
+     */
+    createBoardCategory: (data: RequestRBoardCategory, params: RequestParams = {}) =>
+      this.request<RequestRBoardCategory, any>({
+        path: `/api/v1/board-category`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 게시판 목록 조회합니다.
+     *
+     * @tags 게시판 API
+     * @name PageBoard
+     * @summary [board-1] 게시판 페이지 조회 (Pagination)
+     * @request GET:/api/v1/board
+     * @secure
+     */
+    pageBoard: (
+      query?: {
+        /**
+         * Page Size 페이지 크기 (default : 20)
+         * @format int32
+         * @example 20
+         */
+        size?: number;
+        /**
+         * 현재 페이지 0부터 (Current Page)  현재 페이지 (default : 0)
+         * @format int32
+         * @example 0
+         */
+        page?: number;
+        /**
+         * 정렬 (Sort Page)
+         * @example "created_at,desc"
+         */
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<BoardPaginationResponse, any>({
+        path: `/api/v1/board`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 새로운 게시판를 생성합니다.
+     *
+     * @tags 게시판 API
+     * @name CreateBoard
+     * @summary [board-3] 게시판 생성 (Create)
+     * @request POST:/api/v1/board
+     * @secure
+     */
+    createBoard: (data: RequestRBoard, params: RequestParams = {}) =>
+      this.request<RBoard, any>({
+        path: `/api/v1/board`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
     /**
      * @description JWT Refresh Token 발행합니다.
      *

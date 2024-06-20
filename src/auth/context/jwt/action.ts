@@ -1,30 +1,18 @@
 import {Swagger} from 'src/utils/API';
-import axios, {endpoints} from 'src/utils/axios';
 
 import {setSession} from './utils';
-import {STORAGE_KEY} from './constant';
 import {customError} from "../../../utils/error";
 import {setAccessToken} from "../../../utils/auth";
 
+import type {RequestSignUp, AuthenticationRequest} from "../../../generated/swagger/swagger.api";
+
 // ----------------------------------------------------------------------
-
-export type SignInParams = {
-  email: string;
-  password: string;
-};
-
-export type SignUpParams = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-};
 
 
 /** **************************************
  * Sign in
  *************************************** */
-export const signInWithPassword = async ({email, password}: SignInParams): Promise<void> => {
+export const signInWithPassword = async ({email, password}: AuthenticationRequest): Promise<void> => {
   try {
     const data = {
       email,
@@ -51,32 +39,24 @@ export const signInWithPassword = async ({email, password}: SignInParams): Promi
 /** **************************************
  * Sign up
  *************************************** */
-export const signUp = async ({
-                               email,
-                               password,
-                               firstName,
-                               lastName,
-                             }: SignUpParams): Promise<void> => {
-  const params = {
-    email,
-    password,
-    firstName,
-    lastName,
-  };
-
+export const signUp = async (userJoin: RequestSignUp): Promise<void> => {
+  console.log(
+    userJoin,'userJoin'
+  )
   try {
-    const res = await axios.post(endpoints.auth.signUp, params);
+    const response = await Swagger.api.signUp(userJoin);
 
-    const {accessToken} = res.data;
+    const {accessToken} = response.data;
 
     if (!accessToken) {
       throw new Error('Access token not found in response');
     }
+    // 토큰 담기
+    setAccessToken(accessToken);
 
-    sessionStorage.setItem(STORAGE_KEY, accessToken);
   } catch (error) {
     console.error('Error during sign up:', error);
-    throw error;
+    throw customError(error);
   }
 };
 

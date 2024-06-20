@@ -26,6 +26,11 @@ import {Form, Field} from 'src/components/hook-form';
 
 import {useAuthContext} from 'src/auth/hooks';
 
+import {signUp} from "../../../auth/context/jwt";
+
+import type {RequestSignUp} from "../../../generated/swagger/swagger.api";
+
+
 // ----------------------------------------------------------------------
 
 export type SignUpSchemaType = zod.infer<typeof SignUpSchema>;
@@ -50,8 +55,10 @@ export const SignUpSchema = zod.object({
       /^(?=.*[a-zA-Z])((?=.*\d)|(?=.*\W))(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,50}$/,
       '8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.'
     ),
-  fullName: zod.string().min(1, '이름을 입력해주세요.'),
-  mobile: zod.string().min(1, '휴대폰번호를 입력해 주세요.'),
+  username: zod.string().min(1, '이름을 입력해주세요.'),
+  mobile: zod.string()
+    .min(1, '휴대폰번호를 입력해 주세요.')
+    .regex(/^\d+$/, '숫자만 입력하세요.'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: '비밀번호가 일치하지 않습니다.',
   path: ['confirmPassword']})
@@ -64,14 +71,16 @@ export function JwtSignUpView() {
   const router = useRouter();
 
   const password = useBoolean();
-
+  //  에러 메세지
   const [errorMsg, setErrorMsg] = useState('');
+  // 회원가입 버튼 비활성화
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
 
   const defaultValues = {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: '',
+    username: '',
     mobile: '',
   };
 
@@ -87,15 +96,22 @@ export function JwtSignUpView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // await signUp({
-      //   email: data.email,
-      //   password: data.password,
-      //   firstName: data.firstName,
-      //   lastName: data.lastName,
-      // });
-      // await checkUserSession?.();
+      // SignUpSchema data 에서 confirmPassword는 제외한 나머지가 ...userData 입니다.
+      const { confirmPassword, ...userData } = data;
 
-      router.refresh();
+      const userJoin: RequestSignUp = {
+        ...userData,
+        policy,
+        privacy,
+        marketing
+      };
+
+      // 회원가입 api 실행
+      await signUp(userJoin);
+      // 유저 정보 api 실행
+      await checkUserSession?.();
+      // 회원가입 후 이동하고자 하는 페이지 이동
+      router.push(  paths.dashboard.root);
     } catch (error) {
       console.error(error);
       setErrorMsg(error instanceof Error ? error.message : error);
@@ -104,33 +120,38 @@ export function JwtSignUpView() {
 
   // 이용약관 체크박스
   const [allAgree, setAllAgree] = useState(true);
-  const [taService, setTaService] = useState(true);
-  const [taPrivacy, setTaPrivacy] = useState(true);
-  const [taMarketing, setTaMarketing] = useState(true);
+  const [policy, setPolicy] = useState(true);
+  const [privacy, setPrivacy] = useState(true);
+  const [marketing, setMarketing] = useState(true);
   const [emailRcv, setEmailRcv] = useState(true);
   const [smsRcv, setSmsRcv] = useState(true);
   const [snsRcv, setSnsRcv] = useState(true);
 
   useEffect(() => {
     const remainingCheckboxes = [
-      taService,
-      taPrivacy,
-      taMarketing,
+      policy,
+      privacy,
+      marketing,
       emailRcv,
       smsRcv,
       snsRcv,
     ];
-    // 조건 1: emailRcv, smsRcv, snsRcv 모두 false면 taMarketing false
+    // 조건 1: emailRcv, smsRcv, snsRcv 모두 false면 marketing false
     if (!emailRcv && !smsRcv && !snsRcv) {
-      setTaMarketing(false);
+      setMarketing(false);
     } else {
-      // 조건 2: emailRcv, smsRcv, snsRcv 중 하나라도 true이면 taMarketing true
-      setTaMarketing(true);
+      // 조건 2: emailRcv, smsRcv, snsRcv 중 하나라도 true이면 marketing true
+      setMarketing(true);
     }
     // 조건 3: 전부 true이면 전체 동의 true
     const allChecked = remainingCheckboxes.every((checkbox) => checkbox);
     setAllAgree(allChecked);
-  }, [taService, taPrivacy, taMarketing, emailRcv, smsRcv, snsRcv]);
+  }, [policy, privacy, marketing, emailRcv, smsRcv, snsRcv]);
+
+  // 필수 이용약관 미 선택시 회원가입 버튼 비활성화
+  useEffect(() => {
+    setIsSubmitDisabled(!policy || !privacy);
+  }, [policy, privacy]);
 
 
   /**
@@ -139,9 +160,9 @@ export function JwtSignUpView() {
   const handleAllAgreeChange = () => {
     const checked = !allAgree;
     setAllAgree(checked);
-    setTaService(checked);
-    setTaPrivacy(checked);
-    setTaMarketing(checked);
+    setPolicy(checked);
+    setPrivacy(checked);
+    setMarketing(checked);
     setEmailRcv(checked);
     setSmsRcv(checked);
     setSnsRcv(checked);
@@ -158,8 +179,8 @@ export function JwtSignUpView() {
    * 마케팅 체크박스 선택
    */
   const handleMarketingCheckboxChange = () => {
-    const isChecked = !taMarketing;
-    setTaMarketing(isChecked);
+    const isChecked = !marketing;
+    setMarketing(isChecked);
     setEmailRcv(isChecked);
     setSmsRcv(isChecked);
     setSnsRcv(isChecked);
@@ -225,14 +246,16 @@ export function JwtSignUpView() {
       />
 
       <Field.Text
-        name="fullName"
+        name="username"
         label={<Typography>이름<Typography component='span' sx={{color: "error.main"}}>*</Typography></Typography>}
         InputLabelProps={{shrink: true}}/>
 
       <Field.Text
         name="mobile"
         label={<Typography>휴대폰번호<Typography component='span' sx={{color: "error.main"}}>*</Typography></Typography>}
-        InputLabelProps={{shrink: true}}/>
+        InputLabelProps={{shrink: true}}
+        helperText='-을 제외한 숫자만 입력해주세요.'
+      />
 
       {/* 이용약관 */}
       <FormGroup sx={{textAlign: 'left'}}>
@@ -255,8 +278,8 @@ export function JwtSignUpView() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={taService}
-                onChange={() => handleCheckboxChange(setTaService)}
+                checked={policy}
+                onChange={() => handleCheckboxChange(setPolicy)}
               />
             }
             label="(필수) 서비스 이용약관에 동의합니다."
@@ -277,8 +300,8 @@ export function JwtSignUpView() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={taPrivacy}
-                onChange={() => handleCheckboxChange(setTaPrivacy)}
+                checked={privacy}
+                onChange={() => handleCheckboxChange(setPrivacy)}
               />
             }
             label="(필수) 개인정보 처리방침에 동의합니다."
@@ -291,7 +314,7 @@ export function JwtSignUpView() {
         <FormControlLabel
           control={
             <Checkbox
-              checked={taMarketing}
+              checked={marketing}
               onChange={handleMarketingCheckboxChange}
             />
           }
@@ -335,7 +358,7 @@ export function JwtSignUpView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
-        loadingIndicator="Create account..."
+        disabled={isSubmitDisabled}
       >
         완료
       </LoadingButton>
