@@ -4,10 +4,10 @@ import {useSetState} from 'src/hooks/use-set-state';
 
 import {Swagger} from "../../../utils/API";
 import {AuthContext} from '../auth-context';
+import {customError} from "../../../utils/error";
 import {getAccessToken, isTokenExpired} from "../../../utils/auth";
 
 import type {AuthState} from '../../types';
-import {customError} from "../../../utils/error";
 
 // ----------------------------------------------------------------------
 

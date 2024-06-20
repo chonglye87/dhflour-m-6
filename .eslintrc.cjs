@@ -42,7 +42,12 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 0,
     '@typescript-eslint/consistent-type-exports': 1,
     '@typescript-eslint/consistent-type-imports': 1,
-    '@typescript-eslint/no-unused-vars': [1, { args: 'none' }],
+    '@typescript-eslint/no-unused-vars': 'off',
+    // '@typescript-eslint/no-unused-vars': ['warn', {
+    //   vars: 'all',
+    //   args: 'after-used',
+    //   ignoreRestSiblings: true
+    // }],
     // react
     'react/no-children-prop': 0,
     'react/react-in-jsx-scope': 0,

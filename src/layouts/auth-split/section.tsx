@@ -28,7 +28,7 @@ export function Section({
   method,
   layoutQuery,
   methods,
-  title = 'Manage the job',
+  title = '안녕하세요! 시작해볼까요?',
   imgUrl = `${CONFIG.site.basePath}/assets/illustrations/illustration-dashboard.webp`,
   subtitle = '',
   ...other
