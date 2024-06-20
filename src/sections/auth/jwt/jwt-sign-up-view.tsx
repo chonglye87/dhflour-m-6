@@ -39,6 +39,7 @@ export type SignUpSchemaType = zod.infer<typeof SignUpSchema>;
 // src/sections/_examples/extra/form-validation-view/schema.ts => 필드별 schema 확인 가능
 // 공식문서: https://zod.dev/
 
+// Zod 스키마를 사용하여 회원가입 폼 검증 규칙을 정의합니다.
 export const SignUpSchema = zod.object({
   email: zod.string()
     .min(1, '이메일을 입력해주세요.')
@@ -73,9 +74,9 @@ export function JwtSignUpView() {
   const password = useBoolean();
   //  에러 메세지
   const [errorMsg, setErrorMsg] = useState('');
-  // 회원가입 버튼 비활성화
+  // 회원가입 버튼 비활성화 상태를 정의합니다.
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-
+  // 폼의 기본값을 정의합니다.
   const defaultValues = {
     email: '',
     password: '',
@@ -83,7 +84,7 @@ export function JwtSignUpView() {
     username: '',
     mobile: '',
   };
-
+  // useForm 훅을 사용하여 폼 메서드를 설정합니다. Zod 스키마를 사용하여 검증합니다.
   const methods = useForm<SignUpSchemaType>({
     resolver: zodResolver(SignUpSchema),
     defaultValues,
@@ -94,9 +95,10 @@ export function JwtSignUpView() {
     formState: {isSubmitting},
   } = methods;
 
+  // 회원가입 버튼을 눌렀을 때 실행되는 함수입니다.
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // SignUpSchema data 에서 confirmPassword는 제외한 나머지가 ...userData 입니다.
+      // SignUpSchema data 에서 confirmPassword를 제외한 나머지가 ...userData 입니다.
       const { confirmPassword, ...userData } = data;
 
       const userJoin: RequestSignUp = {
@@ -106,11 +108,11 @@ export function JwtSignUpView() {
         marketing
       };
 
-      // 회원가입 api 실행
+      // 회원가입 API를 호출합니다.
       await signUp(userJoin);
-      // 유저 정보 api 실행
+      // 유저 정보를 가져오는 API를 호출합니다.
       await checkUserSession?.();
-      // 회원가입 후 이동하고자 하는 페이지 이동
+      // 회원가입 후 이동하고자 하는 페이지입니다.
       router.push(  paths.dashboard.root);
     } catch (error) {
       console.error(error);
@@ -118,7 +120,7 @@ export function JwtSignUpView() {
     }
   });
 
-  // 이용약관 체크박스
+  // 이용약관 체크박스 상태를 정의합니다.
   const [allAgree, setAllAgree] = useState(true);
   const [policy, setPolicy] = useState(true);
   const [privacy, setPrivacy] = useState(true);
@@ -351,6 +353,7 @@ export function JwtSignUpView() {
         </Stack>
       </FormGroup>
 
+      {/* type="submit"으로 설정합니다 */}
       <LoadingButton
         fullWidth
         color="inherit"
