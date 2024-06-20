@@ -1,94 +1,82 @@
-import { paths } from 'src/routes/paths';
+import Cookies from 'js-cookie';
 
-import axios from 'src/utils/axios';
-
-import { STORAGE_KEY } from './constant';
+// eslint-disable-next-line import/no-cycle
+import {Axios} from "../../../utils/API";
+import {CONFIG} from "../../../config-global";
 
 // ----------------------------------------------------------------------
 
-export function jwtDecode(token: string) {
-  try {
-    if (!token) return null;
+// 토큰 가져오기
+export function getAccessToken() {
+  return Cookies.get(CONFIG.auth.accessTokenName as string);
+}
 
-    const parts = token.split('.');
-    if (parts.length < 2) {
-      throw new Error('Invalid token!');
-    }
+export function getRefreshToken() {
+  return Cookies.get(CONFIG.auth.refreshTokenName as string);
+}
 
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = JSON.parse(atob(base64));
-
-    return decoded;
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    throw error;
+// 토큰 저정하기
+export function setAccessToken(accessToken: string | null) {
+  if (accessToken) {
+    Cookies.set(
+      CONFIG.auth.accessTokenName as string,
+      accessToken,
+    );
+    // Axios 기본 헤더에 액세스 토큰 설정
+    Axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+  } else {
+    // 액세스 토큰이 없으면 쿠키와 Axios 헤더에서 제거
+    removeAccessToken();
+    delete Axios.defaults.headers.common.Authorization;
   }
 }
 
-// ----------------------------------------------------------------------
-
-export function isValidToken(accessToken: string) {
-  if (!accessToken) {
-    return false;
-  }
-
-  try {
-    const decoded = jwtDecode(accessToken);
-
-    if (!decoded || !('exp' in decoded)) {
-      return false;
-    }
-
-    const currentTime = Date.now() / 1000;
-
-    return decoded.exp > currentTime;
-  } catch (error) {
-    console.error('Error during token validation:', error);
-    return false;
-  }
-}
-
-// ----------------------------------------------------------------------
-
-export function tokenExpired(exp: number) {
-  const currentTime = Date.now();
-  const timeLeft = exp * 1000 - currentTime;
-
-  setTimeout(() => {
-    try {
-      alert('Token expired!');
-      sessionStorage.removeItem(STORAGE_KEY);
-      window.location.href = paths.auth.jwt.signIn;
-    } catch (error) {
-      console.error('Error during token expiration:', error);
-      throw error;
-    }
-  }, timeLeft);
-}
-
-// ----------------------------------------------------------------------
-
-export async function setSession(accessToken: string | null) {
-  try {
-    if (accessToken) {
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
-
-      axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-
-      const decodedToken = jwtDecode(accessToken); // ~3 days by minimals server
-
-      if (decodedToken && 'exp' in decodedToken) {
-        tokenExpired(decodedToken.exp);
-      } else {
-        throw new Error('Invalid access token!');
-      }
+export function setRefreshToken(refreshToken: string | null) {
+  if (refreshToken) {
+    // refreshToken 유효기간 끝나면 토큰 삭제하기
+    const tokenExpired = isTokenExpired(refreshToken);
+    if (tokenExpired) {
+      removeAccessToken();
+      removeRefreshToken();
     } else {
-      sessionStorage.removeItem(STORAGE_KEY);
-      delete axios.defaults.headers.common.Authorization;
+      Cookies.set(
+        CONFIG.auth.refreshTokenName as string,
+        refreshToken,
+      );
     }
-  } catch (error) {
-    console.error('Error during set session:', error);
-    throw error;
+  } else {
+    removeRefreshToken();
   }
 }
+
+// 토큰 제거
+export function removeAccessToken() {
+  Cookies.remove(CONFIG.auth.accessTokenName as string, {
+    path: '/',
+  });
+}
+
+export function removeRefreshToken() {
+  Cookies.remove(CONFIG.auth.refreshTokenName  as string, {
+    path: '/',
+  });
+}
+
+// 토큰 기간 확인
+export function isTokenExpired(token: string) {
+  try {
+    // 토큰을 디코딩하여 만료 시간을 확인
+    const decodedToken = atob(token.split('.')[1]);
+    const tokenData = JSON.parse(decodedToken);
+    if (!tokenData || !tokenData.exp) {
+      return true;
+    }
+    // 현재 시간과 토큰 만료 시간 비교
+    const currentTime = Math.floor(Date.now() / 1000)
+    return tokenData.exp < currentTime;
+  } catch (error) {
+    // 토큰이 유효하지 않으면 만료된 것으로 간주
+    return true;
+  }
+}
+

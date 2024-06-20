@@ -19,6 +19,7 @@ export type RoleBasedGuardProp = {
   children: React.ReactNode;
 };
 
+// 역할 기반으로 접근을 제어하는 컴포넌트입니다.
 export function RoleBasedGuard({
   sx,
   children,
@@ -26,7 +27,9 @@ export function RoleBasedGuard({
   currentRole,
   acceptRoles,
 }: RoleBasedGuardProp) {
+  // 허용된 역할에 현재 사용자의 역할이 포함되어 있는지 확인합니다.
   if (typeof acceptRoles !== 'undefined' && !acceptRoles.includes(currentRole)) {
+    // 허용된 역할에 포함되지 않는 경우 접근 권한이 없음을 표시합니다.
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>

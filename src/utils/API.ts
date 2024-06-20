@@ -7,10 +7,12 @@ import {Api} from "../generated/swagger/swagger.api";
 import {
   getAccessToken,
   setAccessToken,
-  getRefreshToken, setRefreshToken,
+  getRefreshToken,
+  setRefreshToken,
   removeAccessToken,
   removeRefreshToken
-} from "./auth";
+} from "../auth/context/jwt";
+
 
 // ----------------------------------------------------------------------
 // JWT 인증이 필요한 경우 아래와 같은 보안 작업자(securityWorker) 함수를 작성할 수 있습니다.

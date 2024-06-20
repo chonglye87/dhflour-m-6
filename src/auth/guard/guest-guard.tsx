@@ -14,6 +14,7 @@ type Props = {
   children: React.ReactNode;
 };
 
+// 비인증 사용자만 접근할 수 있는 경로를 보호하는 컴포넌트입니다.
 export function GuestGuard({ children }: Props) {
   const router = useRouter();
 
@@ -30,6 +31,7 @@ export function GuestGuard({ children }: Props) {
       return;
     }
 
+    // 인증된 경우 반환 경로로 리디렉션합니다.
     if (authenticated) {
       router.replace(returnTo);
       return;
@@ -38,11 +40,12 @@ export function GuestGuard({ children }: Props) {
     setIsChecking(false);
   };
 
+  // 컴포넌트가 마운트되거나 authenticated 또는 loading 상태가 변경될 때마다 권한을 확인합니다.
   useEffect(() => {
     checkPermissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, loading]);
-
+  // 인증 상태를 확인 중일 때 로딩 화면을 표시합니다.
   if (isChecking) {
     return <SplashScreen />;
   }
