@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 
+import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -104,6 +105,7 @@ export function JwtSignInView() {
 
   const renderForm = (
     <Stack spacing={3}>
+
       <Field.Text name="email" label="이메일" InputLabelProps={{shrink: true}}/>
 
       <Stack spacing={1.5}>
@@ -148,6 +150,12 @@ export function JwtSignInView() {
           {errorMsg}
         </Alert>
       )}
+
+      <Box sx={{mb:3}}>
+        <Alert severity="info">
+          테스트 계정 : wini@test.com / qwer1234!
+        </Alert>
+      </Box>
 
       <Form methods={methods} onSubmit={onSubmit}>
         {renderForm}
