@@ -14,6 +14,7 @@ import {BoardManagerProvider} from "../../sections/board/board-manage-provider";
 
 // Overview
 const IndexPage = lazy(() => import('src/pages/dashboard'));
+const OverviewSamplePage = lazy(() => import('src/pages/dashboard/sample'));
 const OverviewEcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
 const OverviewAnalyticsPage = lazy(() => import('src/pages/dashboard/analytics'));
 const OverviewBankingPage = lazy(() => import('src/pages/dashboard/banking'));
@@ -88,6 +89,7 @@ export const dashboardRoutes = [
       { element: <IndexPage />, index: true },
 
       { path: 'board', element: <BoardManagerProvider ><BoardPage /></BoardManagerProvider> },
+      { path: 'sample', element: <OverviewSamplePage /> },
 
       { path: 'ecommerce', element: <OverviewEcommercePage /> },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },

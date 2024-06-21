@@ -49,8 +49,7 @@ export const navData = [
     items: [
       {title: '게시판', path: paths.dashboard.board, icon: ICONS.blank},
       {title: '회원', path: paths.dashboard.user.list, icon: ICONS.user},
-      {title: '예) React Hook', path: paths.dashboard.user.list, icon: ICONS.user},
-      {title: '예) RESTful API', path: paths.dashboard.user.list, icon: ICONS.user},
+      {title: '예) React', path: paths.dashboard.sample, icon: ICONS.analytics},
     ]
   },
   /**
