@@ -2,7 +2,7 @@
 import {Swagger} from 'src/utils/API';
 
 import {customError} from "../../../utils/error";
-import {setAccessToken, removeAccessToken} from "./utils";
+import {setAccessToken, setRefreshToken, removeAccessToken, removeRefreshToken} from "./utils";
 
 import type {RequestSignUp, AuthenticationRequest} from "../../../generated/swagger/swagger.api";
 
@@ -22,20 +22,23 @@ export const signInWithPassword = async ({email, password}: AuthenticationReques
     // 서버에 로그인 요청을 보내고 응답을 기다림
     const response = await Swagger.api.authAccessToken(data)
     // 응답에서 액세스 토큰을 추출
-    const {accessToken} = response.data;
+    const {accessToken,refreshToken} = response.data;
 
-    // 액세스 토큰을 설정
+    // 토큰을 설정
     setAccessToken(accessToken);
+    setRefreshToken(refreshToken)
 
-    // 액세스 토큰이 없는 경우 오류를 발생시킴
+    //  토큰이 없는 경우 오류를 발생시킴
     if (!accessToken) {
-      throw new Error('Access token not found in response');
+      throw new Error('accessToken token not found in response');
+    }
+    if (!refreshToken) {
+      throw new Error('refreshToken token not found in response');
     }
 
   } catch (error) {
     console.error('Error during sign in:', error);
     throw customError(error);
-    // throw error;
   }
 };
 
@@ -49,14 +52,18 @@ export const signUp = async (userJoin: RequestSignUp): Promise<void> => {
   try {
     // 서버에 회원가입 요청을 보내고 응답을 기다림
     const response = await Swagger.api.signUp(userJoin);
-    // 응답에서 액세스 토큰을 추출
-    const {accessToken} = response.data;
-    // 액세스 토큰이 없는 경우 오류를 발생시킴
+    // 응답에서  토큰을 추출
+    const {accessToken, refreshToken} = response.data;
+    //  토큰이 없는 경우 오류를 발생시킴
     if (!accessToken) {
-      throw new Error('Access token not found in response');
+      throw new Error('accessToken token not found in response');
     }
-    // 액세스 토큰을 설정
+    if (!refreshToken) {
+      throw new Error('refreshToken token not found in response');
+    }
+    //  토큰을 설정
     setAccessToken(accessToken);
+    setRefreshToken(refreshToken)
 
   } catch (error) {
     console.error('Error during sign up:', error);
@@ -69,8 +76,9 @@ export const signUp = async (userJoin: RequestSignUp): Promise<void> => {
  *************************************** */
 export const signOut = async (): Promise<void> => {
   try {
-    // 액세스 토큰을 제거
+    // 토큰을 제거
     removeAccessToken()
+    removeRefreshToken()
   } catch (error) {
     console.error('Error during sign out:', error);
     throw error;
