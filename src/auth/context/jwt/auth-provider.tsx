@@ -2,11 +2,11 @@ import {useMemo, useEffect, useCallback} from 'react';
 
 import {useSetState} from 'src/hooks/use-set-state';
 
-// eslint-disable-next-line import/no-cycle
-import {Swagger} from "../../../utils/API";
 import {AuthContext} from '../auth-context';
+// eslint-disable-next-line import/no-cycle
+import { Swagger} from "../../../utils/API";
 import {customError} from "../../../utils/error";
-import {getAccessToken, isTokenExpired} from "./utils";
+import {getAccessToken, isTokenExpired, setAccessToken} from "./utils";
 
 import type {AuthState} from '../../types';
 
@@ -33,12 +33,12 @@ export function AuthProvider({children}: Props) {
     try {
       // 액세스 토큰 가져오기
       const accessToken = getAccessToken();
-
       // 토큰의 유무와 유효기간 확인
       if (accessToken && !isTokenExpired(accessToken)) {
+        // 토큰 담기
+        setAccessToken(accessToken);
         // 유효한 토큰이 있는 경우, 사용자 정보를 가져옴
         const responseMe = await Swagger.api.getAuthenticatedUserInfo()
-
         const user = responseMe.data;
         // 사용자 정보를 상태에 저장
         setState({user: {...user}, loading: false});

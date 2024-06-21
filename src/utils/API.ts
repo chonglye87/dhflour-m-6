@@ -40,36 +40,36 @@ swagger.instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     // accessToken 값
-    const accessToken = getAccessToken();
+    const access_token = getAccessToken();
     // refreshToken 값
-    const refreshToken = getRefreshToken();
+    const refresh_token = getRefreshToken();
     const originalRequest = error.config;
     // 401 Unauthorized 응답을 받고, 이전에 이미 재시도한 적이 없는 경우, accessToken이 있을 때
     if (
       error.response.status === 401 &&
       !originalRequest._retry &&
-      accessToken
+      access_token
     ) {
       originalRequest._retry = true; // 재시도 했다는 표시를 설정
 
       // refreshToken이 있으면 access_token 재발급 필요
-      if (refreshToken) {
+      if (refresh_token) {
         try {
           // refresh 토큰을 사용하여 새로운 access 토큰을 요청
           const response = await axios.post(
-            `${CONFIG.site.apiURL}/api/v1/user/refresh-token`,
+            `${CONFIG.site.apiURL}/api/v1/authenticate/refresh-token`,
             {
-              refresh_token: refreshToken,
+              refreshToken: refresh_token,
             }
           );
 
           // 새로운 토큰 담기
-          const { access_token, refresh_token } = response.data;
-          setAccessToken(access_token);
-          setRefreshToken(refresh_token);
+          const { accessToken, refreshToken } = response.data;
+          setAccessToken(accessToken);
+          setRefreshToken(refreshToken);
 
           // 실패한 요청을 새 토큰으로 재시도
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return await swagger.instance(originalRequest);
         } catch (refreshError) {
           // refresh 토큰이 유효하지 않은 경우 등의 에러 처리
