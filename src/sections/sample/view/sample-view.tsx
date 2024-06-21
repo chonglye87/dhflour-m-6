@@ -140,7 +140,7 @@ export function SampleView() {
           </Stack>
         </Stack>
         <Stack spacing={1}>
-          <Typography variant="h4"> useState값 + map 함수 사용 </Typography>
+          <Typography variant="h4">useState와 map 함수를 사용하여 RESTful 데이터 렌더링</Typography>
           <Stack direction="row" spacing={1}>
             {categories && categories.map((category) => (
               <Label variant="soft" color="default" key={category.id}>
