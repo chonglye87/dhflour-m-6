@@ -15,7 +15,7 @@ import {useRouter} from 'src/routes/hooks';
 
 import {useBoolean} from 'src/hooks/use-boolean';
 
-import {fISO, fIsAfter, fIsBetween} from 'src/utils/format-time';
+import {fISO, fIsAfter} from 'src/utils/format-time';
 
 import {DashboardContent} from 'src/layouts/dashboard';
 
@@ -96,6 +96,8 @@ export function BoardListView() {
     if (filters.state.query && filters.state.query.length > 1) {
       _query = filters.state.query;
     }
+    console.log(filters.state.startTime, 'filters.state.startTim');
+    console.log(filters.state.endTime, 'filters.state.endTime');
     const {data} = await Swagger.api.pageBoard({
       size: table.rowsPerPage,
       page: table.page,
@@ -108,6 +110,7 @@ export function BoardListView() {
             .filter((id): id is number => true)
           : []
     });
+    console.log(data.content, 'on load table')
     setTableData(data.content || []);
     table.setRowsPerPage(data.size);
     table.setPage(data.page);
@@ -487,10 +490,12 @@ function applyFilter({inputData, comparator, filters, dateError}: ApplyFilterPro
   // }
 
   if (!dateError) {
-    if (startTime && endTime) {
-      inputData = inputData.filter((invoice) => fIsBetween(invoice.createdAt, startTime, endTime));
-    }
+    // if (startTime && endTime) {
+    //   inputData = inputData.filter((invoice) => fIsBetween(invoice.createdAt, startTime, endTime));
+    // }
   }
+
+  // console.log(inputData, 'on load inputData')
 
   return inputData;
 }

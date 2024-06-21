@@ -815,12 +815,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         startTime?: string;
         /** @default "" */
         endTime?: string;
-        /** @default [] */
         categoryIds?: number[];
         /**
          * Page Size 페이지 크기 (default : 20)
          * @format int32
-         * @example 20
+         * @example 10
          */
         size?: number;
         /**

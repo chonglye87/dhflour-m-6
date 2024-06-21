@@ -34,6 +34,12 @@ const swagger = new Api({
   secure: true, // API 요청에 보안 작업자를 사용하려면 이 값을 true로 설정하세요.
 });
 
+// 요청 인터셉터
+// swagger.instance.interceptors.request.use(config => {
+//   config.paramsSerializer = params => qs.stringify(params, { arrayFormat: 'repeat' });
+//   return config;
+// }, error => Promise.reject(error));
+
 // 응답 인터셉터
 swagger.instance.interceptors.response.use(
   // 정상 응답
