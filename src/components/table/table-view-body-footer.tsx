@@ -6,9 +6,10 @@ import {Stack} from "@mui/material";
 import {fDateTime} from "../../utils/format-time";
 
 export type MetadataProps = {
-  createdTime?: string;
+  id?: number;
+  createdAt?: number;
   createdBy?: number;
-  updatedTime?: string;
+  updatedAt?: number;
   updatedBy?: number;
 }
 
@@ -16,13 +17,20 @@ type Props = {
   data: MetadataProps;
 }
 export default function TableViewBodyFooter({data, ...other}: Props) {
-  const {createdTime, updatedTime, createdBy, updatedBy} = data;
+  const {id, createdAt, updatedAt, createdBy, updatedBy} = data;
   return <>
-    {createdTime && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
+    {id && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
+      <Box component="span" sx={{width: 100, color: 'text.secondary', mr: 2}}>
+        ID
+      </Box>
+      {id}
+    </Stack>}
+
+    {createdAt && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
       <Box component="span" sx={{width: 100, color: 'text.secondary', mr: 2}}>
         등록시간
       </Box>
-      {fDateTime(createdTime)}
+      {fDateTime(createdAt * 1000)}
     </Stack>}
 
     {(createdBy !== undefined || false) && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
@@ -32,11 +40,11 @@ export default function TableViewBodyFooter({data, ...other}: Props) {
       {createdBy}
     </Stack>}
 
-    {updatedTime && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
+    {updatedAt && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>
       <Box component="span" sx={{width: 100, color: 'text.secondary', mr: 2}}>
         마지막 수정시간
       </Box>
-      {fDateTime(updatedTime)}
+      {fDateTime(updatedAt * 1000)}
     </Stack>}
 
     {(updatedBy !== undefined || true) && <Stack direction="row" sx={{typography: 'body2', textTransform: 'capitalize'}}>

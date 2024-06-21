@@ -34,6 +34,7 @@ import {
 } from 'src/components/table';
 
 import {Swagger} from "../../../utils/API";
+import BoardViewBody from './board-view-body';
 import {BoardTableRow} from '../board-table-row';
 import BoardNewEditForm from "./board-new-edit-form";
 import {BoardTableToolbar} from '../board-table-toolbar';
@@ -118,7 +119,7 @@ export function BoardListView() {
     try {
       const {data} = await Swagger.api.listBoardCategory();
       if (data) {
-          setCategories(data);
+        setCategories(data);
       }
       handleFilters("categories", []);
     } catch (e) {
@@ -142,13 +143,6 @@ export function BoardListView() {
     openView.onFalse();
     openEdit.onFalse();
     setSelectedId(undefined);
-  };
-
-
-  const handleOpenView = () => {
-    openNew.onFalse();
-    openView.onTrue();
-    openEdit.onFalse();
   };
 
 
@@ -222,14 +216,18 @@ export function BoardListView() {
 
   const handleViewRow = useCallback(
     (id: number) => {
-      router.push(paths.dashboard.board);
+      openNew.onFalse();
+      openView.onTrue();
+      openEdit.onFalse();
+      setSelectedId(id);
     },
-    [router]
+    [openEdit, openNew, openView]
   );
 
   useEffect(() => {
-    loadData().then(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadData().then(() => {
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     table.rowsPerPage,
     table.page,
@@ -242,14 +240,16 @@ export function BoardListView() {
   ]);
 
   useEffect(() => {
-    loadCategoryData().then(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadCategoryData().then(() => {
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
 
     if (selectedId) {
-      loadDetailData(selectedId).then(() => {});
+      loadDetailData(selectedId).then(() => {
+      });
     } else {
       setDetailData(undefined);
     }
@@ -403,13 +403,13 @@ export function BoardListView() {
             handleCloseDrawer();
             handleReset();
           }}/>}
-        />
+      />
 
       <DrawerWrapper
         title="수정"
         open={openEdit.value}
         onClose={handleCloseDrawer}
-        children={detailData && <BoardNewEditForm
+        children={detailData ? <BoardNewEditForm
           categories={categories}
           id={selectedId}
           currentData={{
@@ -421,8 +421,15 @@ export function BoardListView() {
           onEnd={() => {
             handleCloseDrawer();
             handleReset();
-          }}/>}
-        />
+          }}/> : <>존재하지 않음</>}
+      />
+
+      <DrawerWrapper
+        title="상세 보기"
+        open={openView.value}
+        onClose={handleCloseDrawer}
+        children={detailData ? <BoardViewBody data={detailData}/> : <>존재하지 않음</>}
+      />
 
       <ConfirmDialog
         open={confirm.value}
