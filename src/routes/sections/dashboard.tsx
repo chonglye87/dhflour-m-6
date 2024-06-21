@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/auth/guard';
 
 // Overview
 const IndexPage = lazy(() => import('src/pages/dashboard'));
+const OverviewSamplePage = lazy(() => import('src/pages/dashboard/sample'));
 const OverviewEcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
 const OverviewAnalyticsPage = lazy(() => import('src/pages/dashboard/analytics'));
 const OverviewBankingPage = lazy(() => import('src/pages/dashboard/banking'));
@@ -82,6 +83,7 @@ export const dashboardRoutes = [
     element: CONFIG.auth.skip ? <>{layoutContent}</> : <AuthGuard>{layoutContent}</AuthGuard>,
     children: [
       { element: <IndexPage />, index: true },
+      { path: 'sample', element: <OverviewSamplePage /> },
       { path: 'ecommerce', element: <OverviewEcommercePage /> },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
       { path: 'banking', element: <OverviewBankingPage /> },

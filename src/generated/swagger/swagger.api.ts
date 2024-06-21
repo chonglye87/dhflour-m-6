@@ -64,6 +64,8 @@ export interface RequestRBoard {
   title: string;
   /** 내용 */
   content?: string;
+  /** 카테고리 ID */
+  categoryIds?: number[];
 }
 
 export interface RequestRBoardCategory {
@@ -160,11 +162,48 @@ export interface RBoard {
    * @format int64
    */
   version: number;
+  /**
+   * ID
+   * @format int64
+   */
+  id: number;
+  /** 제목 */
+  title: string;
+  /** 내용 */
+  content: string;
+  categories?: RBoardCategory[];
+}
+
+export interface RBoardCategory {
+  /**
+   * 등록시간
+   * @format date-time
+   */
+  createdAt: string;
+  /**
+   * 등록자
+   * @format int64
+   */
+  createdBy: number;
+  /**
+   * 수정시간
+   * @format date-time
+   */
+  updatedAt: string;
+  /**
+   * 수정자
+   * @format int64
+   */
+  updatedBy: number;
+  /**
+   * 버전
+   * @format int64
+   */
+  version: number;
   /** @format int64 */
   id?: number;
-  /** 버전 */
-  title: string;
-  content?: string;
+  /** 카테고리명 */
+  name: string;
 }
 
 export interface RefreshTokenRequest {
@@ -253,59 +292,27 @@ export interface RUserPaginationResponse {
    * @format int32
    * @example 0
    */
-  page?: number;
+  page: number;
   /**
    * 페이지 크기
    * @format int32
    * @example 20
    */
-  size?: number;
+  size: number;
   /**
    * 전체 요소 수
    * @format int64
    * @example 100
    */
-  totalElements?: number;
+  totalElements: number;
   /**
    * 전체 페이지 수
    * @format int32
    * @example 5
    */
-  totalPages?: number;
+  totalPages: number;
   /** 페이지에 포함된 콘텐츠 */
   content?: RUser[];
-}
-
-export interface RBoardCategory {
-  /**
-   * 등록시간
-   * @format date-time
-   */
-  createdAt: string;
-  /**
-   * 등록자
-   * @format int64
-   */
-  createdBy: number;
-  /**
-   * 수정시간
-   * @format date-time
-   */
-  updatedAt: string;
-  /**
-   * 수정자
-   * @format int64
-   */
-  updatedBy: number;
-  /**
-   * 버전
-   * @format int64
-   */
-  version: number;
-  /** @format int64 */
-  id?: number;
-  /** 카테고리명 */
-  name: string;
 }
 
 /** 게시판 페이지네이션 응답 */
@@ -315,25 +322,25 @@ export interface RBoardPaginationResponse {
    * @format int32
    * @example 0
    */
-  page?: number;
+  page: number;
   /**
    * 페이지 크기
    * @format int32
    * @example 20
    */
-  size?: number;
+  size: number;
   /**
    * 전체 요소 수
    * @format int64
    * @example 100
    */
-  totalElements?: number;
+  totalElements: number;
   /**
    * 전체 페이지 수
    * @format int32
    * @example 5
    */
-  totalPages?: number;
+  totalPages: number;
   /** 페이지에 포함된 콘텐츠 */
   content?: RBoard[];
 }
@@ -383,7 +390,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private format?: ResponseType;
 
   constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8000" });
+    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8080" });
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
@@ -472,7 +479,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title API 문서
  * @version v1.0.0
- * @baseUrl http://localhost:8000
+ * @baseUrl http://localhost:8080
  *
  * 대한제분 API, powered by Spring Boot 3
  */
@@ -759,7 +766,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<RBoardPaginationResponse, any>({
+      this.request<RBoardCategory[], any>({
         path: `/api/v1/board-category`,
         method: "GET",
         query: query,
@@ -799,6 +806,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     pageBoard: (
       query?: {
+        /** @default "" */
+        query?: string;
+        /** @default "" */
+        startTime?: string;
+        /** @default "" */
+        endTime?: string;
+        /** @default [] */
+        categoryIds?: number[];
         /**
          * Page Size 페이지 크기 (default : 20)
          * @format int32
