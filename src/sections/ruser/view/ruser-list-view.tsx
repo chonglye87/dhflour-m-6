@@ -33,38 +33,36 @@ import {
 } from 'src/components/table';
 
 import {Swagger} from "../../../utils/API";
-import BoardViewBody from './board-view-body';
-import {BoardTableRow} from './board-table-row';
-import BoardNewEditForm from "./board-new-edit-form";
-import {BoardTableToolbar} from '../board-table-toolbar';
-import {useBoardManagerContext} from "../board-manage-provider";
-import {BoardTableFiltersResult} from '../board-table-filters-result';
+import RUserViewBody from './ruser-view-body';
+import {RUserTableRow} from './ruser-table-row';
+import RUserNewEditForm from "./ruser-new-edit-form";
+import {RUserTableToolbar} from '../ruser-table-toolbar';
+import {useRUserManagerContext} from "../ruser-manage-provider";
+import {RUserTableFiltersResult} from '../ruser-table-filters-result';
 import {DrawerWrapper} from "../../../components/drawer/DrawerWrapper";
 
-import type {IBoardFilters} from "../../../types/board";
-import type {RBoard, RBoardCategory} from "../../../generated/swagger/swagger.api";
+import type {IRUserFilters} from "../../../types/ruser";
+import type {RUser} from "../../../generated/swagger/swagger.api";
 
 // ----------------------------------------------------------------------
 
 /* 테이블 헤더 데이터 */
 const TABLE_HEAD = [
   {id: "id", label: "ID", align: "left"},
-  {id: "title", label: "제목", align: "left", width: 220},
-  {id: "categories.name", label: "카테고리", align: "center"},
-  {id: "top", label: "상단고정", align: "center"},
-  {id: "pageView", label: "페이지 뷰", align: "center"},
-  {id: "createdTime", label: "등록시간", align: "center"},
+  {id: "name", label: "사용자", align: "left", width: 220},
+  {id: "mobile", label: "휴대폰번호"},
+  {id: "policy", label: "약관정보"},
+  {id: "createdAt", label: "등록시간", align: "center"},
   {id: ""},
 ];
 
 // ----------------------------------------------------------------------
 
-export function BoardListView() {
+export function RUserListView() {
   // 상태 정의
   const [selectedId, setSelectedId] = useState<number | undefined>();
-  const [tableData, setTableData] = useState<RBoard[]>([]);
-  const [detailData, setDetailData] = useState<RBoard>();
-  const [categories, setCategories] = useState<RBoardCategory[]>([]);
+  const [tableData, setTableData] = useState<RUser[]>([]);
+  const [detailData, setDetailData] = useState<RUser>();
 
   // Boolean 상태 훅들
   const confirm = useBoolean();
@@ -73,12 +71,12 @@ export function BoardListView() {
   const openView = useBoolean();
   const openEdit = useBoolean();
 
-  // 공지사항 게시판 Context에서 필요한 정보들을 가져옴
+  // 회원 관리 Context에서 필요한 정보들을 가져옴
   const {
     table, // use-table 훅
     denseHeight, // 밀집 높이
     filters,// 필터 관리
-  } = useBoardManagerContext();
+  } = useRUserManagerContext();
 
   // 페이지 데이터를 불러오는 함수
   const loadData = useCallback(async () => {
@@ -87,48 +85,30 @@ export function BoardListView() {
     if (filters.state.query && filters.state.query.length > 1) {
       _query = filters.state.query;
     }
-    const {data} = await Swagger.api.pageBoard({
+    const {data} = await Swagger.api.pageUser({
       size: table.rowsPerPage, // 페이지 크기 기본: 10
       page: table.page, // 현재 페이지 0번 부터 시작
       query: _query, // 검색어
       startTime: fISO(filters.state.startTime), // 시작일
       endTime: fISO(filters.state.endTime), // 종료일
-      "categoryIds[]":
-        filters.state.categoryIds !== undefined
-          ? filters.state.categoryIds
-            .filter((id): id is number => true)
-          : [] // 카테고리
     });
     setTableData(data.content || []); // 테이블 데이터를 설정
     table.setRowsPerPage(data.size); // 페이지 사이즈
     table.setPage(data.page); // 현재 페이지
     table.setTotal(data.totalElements); // 총수량
     loading.onFalse();
-  }, [filters.state.categoryIds, filters.state.endTime, filters.state.query, filters.state.startTime, loading, table]);
-
-  // 카테고리 데이터를 불러오는 함수
-  const loadCategoryData = useCallback(async () => {
-    try {
-      const {data} = await Swagger.api.listBoardCategory(); // 카테고리 호출
-      if (data) {
-        setCategories(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
+  }, [filters.state.endTime, filters.state.query, filters.state.startTime, loading, table]);
 
   // 상세 데이터를 불러오는 함수
   const loadDetailData = useCallback(async (id: number) => {
-    const {data} = await Swagger.api.getBoardById(id); // 상세 호출
+    const {data} = await Swagger.api.getUserById(id); // 상세 호출
     setDetailData(data);
   }, []);
 
   // 데이터와 카테고리를 리셋하는 함수
   const handleReset = useCallback(async () => {
     loadData();
-    loadCategoryData();
-  }, [loadCategoryData, loadData]);
+  }, [loadData]);
 
   // 필터 날짜 에러 확인
   const dateError = fIsAfter(filters.state.startTime, filters.state.endTime);
@@ -144,7 +124,6 @@ export function BoardListView() {
   // 필터 리셋 가능한지 여부 확인
   const canReset =
     !!filters.state.query ||
-    filters.state.categoryIds.length > 0 ||
     (!!filters.state.startTime && !!filters.state.endTime);
 
   // 게시판 데이터가 없을 경우 표시
@@ -154,7 +133,7 @@ export function BoardListView() {
   const handleDeleteRow = useCallback(
     async (id: number) => {
       try {
-        const response = await Swagger.api.deleteBoard(id);
+        const response = await Swagger.api.deleteUser(id);
         if(response.status === 200) {
           toast.success('삭제되었습니다.');
           handleReset().then(()=> {});
@@ -171,7 +150,7 @@ export function BoardListView() {
     try {
       if (table.selected) {
         const selectedIdsAsNumbers = table.selected.map(id => Number(id));
-        const response = await Swagger.api.deleteBoards(selectedIdsAsNumbers);
+        const response = await Swagger.api.deleteUsers(selectedIdsAsNumbers);
         if (response.status === 200) {
           toast.success('삭제되었습니다.');
           handleReset().then(()=> {});
@@ -235,16 +214,8 @@ export function BoardListView() {
     table.order,
     filters.state.query,
     filters.state.startTime,
-    filters.state.endTime,
-    filters.state.categoryIds
+    filters.state.endTime
   ]);
-
-  // 카테고리 데이터 로드를 위한 useEffect
-  useEffect(() => {
-    loadCategoryData().then(() => {
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // 상세 데이터 로드를 위한 useEffect
   useEffect(() => {
@@ -261,10 +232,10 @@ export function BoardListView() {
       <DashboardContent>
         {/* 상단 Breadcrumbs */}
         <CustomBreadcrumbs
-          heading="공지사항 게시판"
+          heading="회원 관리"
           links={[
             {name: '대시보드', href: paths.dashboard.root},
-            {name: '게시판', href: paths.dashboard.board},
+            {name: '회원', href: paths.dashboard.ruser},
             {name: '목록'},
           ]}
           action={
@@ -284,16 +255,15 @@ export function BoardListView() {
 
         <Card>
           {/* 테이블 툴바 콤포넌트 */}
-          <BoardTableToolbar
+          <RUserTableToolbar
             filters={filters}
             dateError={dateError}
             onResetPage={table.onResetPage}
-            options={{categories}}
           />
 
           {/* 테이블 필터 결과 콤포넌트 */}
           {canReset && (
-            <BoardTableFiltersResult
+            <RUserTableFiltersResult
               filters={filters}
               onResetPage={table.onResetPage}
               totalResults={dataFiltered.length}
@@ -366,7 +336,7 @@ export function BoardListView() {
                   {/* 테이블 결과 결과 Row */}
                   {dataFiltered
                     .map((row) => (
-                      <BoardTableRow
+                      <RUserTableRow
                         key={row.id}
                         row={row}
                         selected={table.selected.includes(`${row.id}`)}
@@ -407,8 +377,7 @@ export function BoardListView() {
         title="새글 작성"
         open={openNew.value}
         onClose={handleCloseDrawer}
-        children={<BoardNewEditForm
-          categories={categories}
+        children={<RUserNewEditForm
           onEnd={() => {
             handleCloseDrawer();
             handleReset();
@@ -420,13 +389,15 @@ export function BoardListView() {
         title="수정 하기"
         open={openEdit.value}
         onClose={handleCloseDrawer}
-        children={detailData ? <BoardNewEditForm
-          categories={categories}
+        children={detailData ? <RUserNewEditForm
           id={selectedId}
           currentData={{
-            title: detailData.title,
-            content: detailData.content,
-            categoryIds: detailData.categories && detailData.categories.map(category => category.id)
+            email: detailData.email,
+            username: detailData.username,
+            mobile: detailData.mobile,
+            policy: detailData.policy,
+            privacy: detailData.privacy,
+            marketing: detailData.marketing
           }}
           isEdit
           onEnd={() => {
@@ -440,7 +411,7 @@ export function BoardListView() {
         title="상세 보기"
         open={openView.value}
         onClose={handleCloseDrawer}
-        children={detailData ? <BoardViewBody data={detailData}/> : <>존재하지 않음</>}
+        children={detailData ? <RUserViewBody data={detailData}/> : <>존재하지 않음</>}
       />
 
       {/* 삭제 확인 다이얼로그 */}
@@ -475,13 +446,13 @@ export function BoardListView() {
 // 테이블 필터 관리
 type ApplyFilterProps = {
   dateError: boolean;
-  inputData: RBoard[];
-  filters: IBoardFilters;
+  inputData: RUser[];
+  filters: IRUserFilters;
   comparator: (a: any, b: any) => number;
 };
 
 function applyFilter({inputData, comparator, filters, dateError}: ApplyFilterProps) {
-  const {query, startTime, endTime, categoryIds} = filters;
+  const {query, startTime, endTime} = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 

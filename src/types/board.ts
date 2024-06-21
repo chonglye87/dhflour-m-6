@@ -1,5 +1,4 @@
 import type {IDatePickerControl} from "./common";
-import type {RBoardCategory} from "../generated/swagger/swagger.api";
 
 export type IBoardFilters = {
   query: string;
@@ -8,7 +7,7 @@ export type IBoardFilters = {
   endTime: IDatePickerControl;
 };
 
-export type IBoardFilterValue = string | RBoardCategory[] | Date | null;
+export type IBoardFilterValue = string | number[] | Date | null;
 
 export type IBoardCategoryFilters = {
   query: string;

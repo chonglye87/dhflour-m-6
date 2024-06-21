@@ -5,6 +5,12 @@
 ```
 /src
 │
+├── /routes
+│   └── /path.ts                        // 경로 관리 : dashboar.board: `${ROOTS.DASHBOARD}/board` < 추가
+│
+├── /layouts
+│   └── /config-nav-dashboard.tsx       // 좌측 메뉴 목록 관리
+│
 ├── /pages
 │   └── /dashboard
 │       └── /board
@@ -25,6 +31,9 @@
 │           ├── board-new-edit-form.tsx // 등록/수정 컴퍼넌트
 │           ├── board-view-body.tsx     // 상세보기 컴퍼넌트
 │           └── board-table-row.tsx     // 테이블 행 컴퍼넌트
+│
+├── /types
+│   └── /board.tx                       // 필터 객체 유형
 ```
 
 ## 세부 설명

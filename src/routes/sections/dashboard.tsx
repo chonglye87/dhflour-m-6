@@ -9,6 +9,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import { AuthGuard } from 'src/auth/guard';
 
 import {BoardManagerProvider} from "../../sections/board/board-manage-provider";
+import {RUserManagerProvider} from "../../sections/ruser/ruser-manage-provider";
 
 // ----------------------------------------------------------------------
 
@@ -70,6 +71,7 @@ const ParamsPage = lazy(() => import('src/pages/dashboard/params'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 // Sample
 const BoardPage = lazy(() => import('src/pages/dashboard/board/list'));
+const RUserPage = lazy(() => import('src/pages/dashboard/ruser/list'));
 
 // ----------------------------------------------------------------------
 
@@ -89,6 +91,7 @@ export const dashboardRoutes = [
       { element: <IndexPage />, index: true },
 
       { path: 'board', element: <BoardManagerProvider ><BoardPage /></BoardManagerProvider> },
+      { path: 'ruser', element: <RUserManagerProvider ><RUserPage /></RUserManagerProvider> },
       { path: 'sample', element: <OverviewSamplePage /> },
 
       { path: 'ecommerce', element: <OverviewEcommercePage /> },

@@ -38,7 +38,7 @@ export interface RequestRUser {
    * @maxLength 255
    * @example "Yuio1234!"
    */
-  password: string;
+  password?: string;
   /**
    * 이용약관동의 여부
    * @example true
@@ -102,8 +102,11 @@ export interface RUser {
    * @format int64
    */
   version: number;
-  /** @format int64 */
-  id?: number;
+  /**
+   * ID
+   * @format int64
+   */
+  id: number;
   /**
    * 사용자명
    * @example "홍길동"
@@ -701,6 +704,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     pageUser: (
       query?: {
+        /** @default "" */
+        query?: string;
+        /** @default "" */
+        startTime?: string;
+        /** @default "" */
+        endTime?: string;
         /**
          * Page Size 페이지 크기 (default : 20)
          * @format int32
@@ -815,7 +824,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         startTime?: string;
         /** @default "" */
         endTime?: string;
-        categoryIds?: number[];
+        "categoryIds[]"?: number[];
         /**
          * Page Size 페이지 크기 (default : 20)
          * @format int32
@@ -1092,6 +1101,26 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<object, any>({
         path: `/api/asymmetric/jwt/create-key`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 회원 여러 개를 삭제합니다.
+     *
+     * @tags 회원 API
+     * @name DeleteUsers
+     * @summary [user-7] 여러 회원 삭제 (Delete All)
+     * @request DELETE:/api/v1/user/delete-all
+     * @secure
+     */
+    deleteUsers: (data: number[], params: RequestParams = {}) =>
+      this.request<object, any>({
+        path: `/api/v1/user/delete-all`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
