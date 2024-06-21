@@ -94,7 +94,7 @@ export const paths = {
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
-    board: `${ROOTS.DASHBOARD}/mail`, // 주소 추가
+    board: `${ROOTS.DASHBOARD}/board`, // 주소 추가
     mail: `${ROOTS.DASHBOARD}/mail`,
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,

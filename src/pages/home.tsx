@@ -1,7 +1,6 @@
 import {useEffect} from "react";
 import { Helmet } from 'react-helmet-async';
 
-import {paths} from "../routes/paths";
 import {useRouter} from "../routes/hooks";
 
 // ----------------------------------------------------------------------
@@ -16,7 +15,7 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push(paths.dashboard.root);
+    // router.push(paths.dashboard.root);
   }, [router]);
 
   return (

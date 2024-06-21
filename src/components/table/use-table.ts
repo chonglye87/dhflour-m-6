@@ -40,10 +40,10 @@ export function useTable(props?: UseTableProps): UseTableReturn {
   );
 
   const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
+    (inputValue: string | number) => {
+      const newSelected = selected.includes(`${inputValue}`)
+        ? selected.filter((value) => value !== `${inputValue}`)
+        : [...selected, `${inputValue}`];
 
       setSelected(newSelected);
     },

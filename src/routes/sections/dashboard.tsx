@@ -8,6 +8,8 @@ import { LoadingScreen } from 'src/components/loading-screen';
 
 import { AuthGuard } from 'src/auth/guard';
 
+import {BoardManagerProvider} from "../../sections/board/board-manage-provider";
+
 // ----------------------------------------------------------------------
 
 // Overview
@@ -65,6 +67,8 @@ const PermissionDeniedPage = lazy(() => import('src/pages/dashboard/permission')
 // Blank page
 const ParamsPage = lazy(() => import('src/pages/dashboard/params'));
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
+// Sample
+const BoardPage = lazy(() => import('src/pages/dashboard/board/list'));
 
 // ----------------------------------------------------------------------
 
@@ -82,6 +86,9 @@ export const dashboardRoutes = [
     element: CONFIG.auth.skip ? <>{layoutContent}</> : <AuthGuard>{layoutContent}</AuthGuard>,
     children: [
       { element: <IndexPage />, index: true },
+
+      { path: 'board', element: <BoardManagerProvider ><BoardPage /></BoardManagerProvider> },
+
       { path: 'ecommerce', element: <OverviewEcommercePage /> },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
       { path: 'banking', element: <OverviewBankingPage /> },

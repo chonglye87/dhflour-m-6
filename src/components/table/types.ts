@@ -8,7 +8,7 @@ export type TableProps = {
   orderBy: string;
   //
   selected: string[];
-  onSelectRow: (id: string) => void;
+  onSelectRow: (id: string | number) => void;
   onSelectAllRows: (checked: boolean, newSelecteds: string[]) => void;
   //
   onResetPage: () => void;
@@ -31,4 +31,35 @@ export type TableProps = {
   setOrderBy: React.Dispatch<React.SetStateAction<string>>;
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   setRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
+};
+
+
+export const initialTable: TableProps = {
+  dense: false,
+  page: 0,
+  rowsPerPage: 10,
+  order: 'asc',
+  orderBy: 'id',
+  selected: [],
+  onSelectRow: (id: string | number) => {},
+  onSelectAllRows: (checked: boolean, newSelecteds: string[]) => {},
+  onResetPage: () => {},
+  onSort: (id: string) => {},
+  onChangePage: (event: unknown, newPage: number) => {},
+  onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => {},
+  onChangeDense: (event: React.ChangeEvent<HTMLInputElement>) => {},
+  onUpdatePageDeleteRow: (totalRowsInPage: number) => {},
+  onUpdatePageDeleteRows: ({
+                             totalRowsInPage,
+                             totalRowsFiltered,
+                           }: {
+    totalRowsInPage: number;
+    totalRowsFiltered: number;
+  }) => {},
+  setPage: () => {},
+  setDense: () => {},
+  setOrder: () => {},
+  setOrderBy: () => {},
+  setSelected: () => {},
+  setRowsPerPage: () => {},
 };

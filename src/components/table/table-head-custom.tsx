@@ -77,7 +77,7 @@ export function TableHeadCustom({
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={() => onSort(headCell.id)}
               >
-                {headCell.label}
+                <Box component="span" dangerouslySetInnerHTML={{__html: headCell.label}} />
 
                 {orderBy === headCell.id ? (
                   <Box sx={{ ...visuallyHidden }}>
@@ -86,7 +86,7 @@ export function TableHeadCustom({
                 ) : null}
               </TableSortLabel>
             ) : (
-              headCell.label
+              <Box component="span" dangerouslySetInnerHTML={{__html: headCell.label}} />
             )}
           </TableCell>
         ))}

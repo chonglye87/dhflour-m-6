@@ -15,3 +15,13 @@
         ]
     }
    ```
+3. 라우트 추가
+   - 위치 : /src/sections/dashboard.tsx
+   - 콤포넌트 가져오기
+   ```typescript
+   const BoardPage = lazy(() => import('src/pages/dashboard/board/list'));
+   ```
+   - dashboardRoutes > children 배열에 추가하기
+   ```typescript
+    { path: 'board', element: <BoardPage /> },
+   ```
