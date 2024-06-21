@@ -15,9 +15,9 @@ import {Iconify} from 'src/components/iconify';
 import {ConfirmDialog} from 'src/components/custom-dialog';
 import {usePopover, CustomPopover} from 'src/components/custom-popover';
 
-import {fDateTime} from "../../utils/format-time";
+import {fDateTime} from "../../../utils/format-time";
 
-import type {RBoard} from "../../generated/swagger/swagger.api";
+import type {RBoard} from "../../../generated/swagger/swagger.api";
 
 // ----------------------------------------------------------------------
 

@@ -34,7 +34,7 @@ import {
 
 import {Swagger} from "../../../utils/API";
 import BoardViewBody from './board-view-body';
-import {BoardTableRow} from '../board-table-row';
+import {BoardTableRow} from './board-table-row';
 import BoardNewEditForm from "./board-new-edit-form";
 import {BoardTableToolbar} from '../board-table-toolbar';
 import {useBoardManagerContext} from "../board-manage-provider";
@@ -46,7 +46,7 @@ import type {RBoard, RBoardCategory} from "../../../generated/swagger/swagger.ap
 
 // ----------------------------------------------------------------------
 
-{/* 테이블 헤더 데이터 */}
+/* 테이블 헤더 데이터 */
 const TABLE_HEAD = [
   {id: "id", label: "ID", align: "left"},
   {id: "title", label: "제목", align: "left", width: 220},

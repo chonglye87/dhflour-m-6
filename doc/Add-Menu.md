@@ -1,4 +1,4 @@
-# Dashboard Menu 추가 방법
+  # Dashboard Menu 추가 방법
 
 1. path 경로 등록
    - 위치 : /src/routes/paths.ts
@@ -16,7 +16,7 @@
     }
    ```
 3. 라우트 추가
-   - 위치 : /src/sections/dashboard.tsx
+   - 위치 : /src/routes/sections/dashboard.tsx
    - 콤포넌트 가져오기
    ```typescript
    const BoardPage = lazy(() => import('src/pages/dashboard/board/list'));
