@@ -1,6 +1,6 @@
 # FRONT 개발 환경 설정 ( Windows )
 ## Node.js 설치 및 설정
-- [NGINX_INSTALL.md](./doc/NGINX_INSTALL.md) 파일을 참고하세요.
+- [NVM_INSTALL.md](./doc/NVM_INSTALL.md) 파일을 참고하세요.
 
 ## ESLint & Prettier 설정
 - [ESLint.md](./doc/ESLint.md) 파일을 참고하세요.
