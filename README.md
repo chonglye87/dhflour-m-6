@@ -1,7 +1,19 @@
 # FRONT 개발 환경 설정 ( Windows )
 ## Node.js 설치 및 설정
-- Nginx 설치 및 실행 방법은 [NGINX_INSTALL.md](./doc/NGINX_INSTALL.md) 파일을 참고하세요.
+- [NGINX_INSTALL.md](./doc/NGINX_INSTALL.md) 파일을 참고하세요.
 
+## ESLint & Prettier 설정
+- [ESLint.md](./doc/ESLint.md) 파일을 참고하세요.
+
+## Git 및 버전 관리 설정
+- [Git.md](./doc/Git.md) 파일을 참고하세요.
+
+## 환경 변수 설정
+- [Env.md](./doc/Env.md) 파일을 참고하세요.
+
+## 의존성
+
+# 실행 방법
 ### Yarn으로 프로젝트 의존성 관리
 ```bash
 ## 프로젝트의 모든 의존성을 설치
@@ -20,15 +32,6 @@ $ rm -rf node_modules yarn.lock
 ## 패키지를 새로 설치
 $ yarn install
 ```
-## ESLint & Prettier
-- [ESLint.md](./doc/ESLint.md) 파일을 참고하세요.
-
-## Git 및 버전 관리 설정
-- [Git.md](./doc/Git.md) 파일을 참고하세요.
-
-
-## 환경 변수 설정
-- [Env.md](./doc/Env.md) 파일을 참고하세요.
 
 ## 프로젝트 스크립트
 ### package.json scripts 속성
