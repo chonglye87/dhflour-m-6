@@ -23,9 +23,10 @@ interface Props {
 }
 
 export default function BoardViewBody({data, sx, ...other}: Props) {
-
+  // 게시판 데이터 디스트럭처링
   const {id, title, content, createdAt, updatedAt, categories, createdBy, updatedBy} = data;
 
+  // Boolean 상태 보기
   const properties = useBoolean(true);
 
   return (
@@ -39,7 +40,7 @@ export default function BoardViewBody({data, sx, ...other}: Props) {
             sx={{mb: {xs: 3, md: 0}}}
           >
             <Stack flexGrow={1} sx={{width: 1}}>
-              {/* 날짜 */}
+              {/* 생성 날짜 표시 */}
               <Typography variant="caption" sx={{color: 'text.secondary', mb: 1}}>
                 {fDateTime(createdAt * 1000)}
               </Typography>
@@ -60,12 +61,14 @@ export default function BoardViewBody({data, sx, ...other}: Props) {
 
           <Divider sx={{borderStyle: 'dashed'}}/>
 
+          {/* 본문 */}
           <Stack spacing={1}>
             {content && <Box sx={{mb: 1}} dangerouslySetInnerHTML={{__html: content}}/>}
           </Stack>
         </Stack>
       </Card>
 
+      {/* 메타 데이터 정보 */}
       <Stack spacing={1.5} sx={{p: 1}}>
         <Stack
           direction="row"

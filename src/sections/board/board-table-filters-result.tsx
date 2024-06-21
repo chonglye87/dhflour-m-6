@@ -19,24 +19,26 @@ type Props = {
   onResetPage: () => void;
   filters: UseSetStateReturn<IBoardFilters>;
 };
-
+// 공지사항 게시판 테이블 검색 필터 결과 컴포넌트 정의
 export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx }: Props) {
 
+  // 카테고리 필터 제거 핸들러
   const handleRemoveCategory = useCallback(
     (inputValue: number) => {
-      const newValue = filters.state.categoryIds.filter((item) => item !== inputValue);
-
       onResetPage();
+      const newValue = filters.state.categoryIds.filter((item) => item !== inputValue);
       filters.setState({ categoryIds: newValue });
     },
     [filters, onResetPage]
   );
 
+  // 검색어 필터 제거 핸들러
   const handleRemoveKeyword = useCallback(() => {
     onResetPage();
     filters.setState({ query: '' });
   }, [filters, onResetPage]);
 
+  // 날짜 필터 제거 핸들러
   const handleRemoveDate = useCallback(() => {
     onResetPage();
     filters.setState({ startTime: null, endTime: null });
@@ -44,13 +46,14 @@ export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx
 
   return (
     <FiltersResult totalResults={totalResults} onReset={filters.onResetState} sx={sx}>
+      {/* 카테고리 필터 블록 */}
       <FiltersBlock label="카테고리:" isShow={!!filters.state.categoryIds.length}>
         {filters.state.categoryIds.map((categoryId) => (
           <Chip {...chipProps} key={categoryId} label={categoryId} onDelete={() => handleRemoveCategory(categoryId)} />
         ))}
       </FiltersBlock>
 
-
+      {/* 기간 필터 블록 */}
       <FiltersBlock
         label="기간:"
         isShow={Boolean(filters.state.startTime && filters.state.endTime)}
@@ -62,6 +65,7 @@ export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx
         />
       </FiltersBlock>
 
+      {/* 검색어 필터 블록 */}
       <FiltersBlock label="검색어:" isShow={!!filters.state.query}>
         <Chip {...chipProps} label={filters.state.query} onDelete={handleRemoveKeyword} />
       </FiltersBlock>

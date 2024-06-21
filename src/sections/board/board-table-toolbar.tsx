@@ -33,39 +33,47 @@ type Props = {
   };
 };
 
+// 공지사항 게시판 테이블 툴바 컴포넌트 정의
 export function BoardTableToolbar({ filters, options, dateError, onResetPage }: Props) {
+  // Popover 상태 관리 훅 사용
   const popover = usePopover();
 
+  // 카테고리 필터 핸들러
   const handleFilterCategory = useCallback(
     (event: SelectChangeEvent<number[]>) => {
-      // Directly using event.target.value as number[]
+      // Select 컴포넌트에서 선택된 값을 number[] 타입으로 변환
       const newValue = event.target.value as number[];
-
+      // 페이지 리셋 및 필터 상태 업데이트
       onResetPage();
       filters.setState({ categoryIds: newValue });
     },
     [filters, onResetPage]
   );
 
-
+  // 검색어 필터 핸들러
   const handleFilterName = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      // 페이지 리셋 및 필터 상태 업데이트
       onResetPage();
       filters.setState({ query: event.target.value });
     },
     [filters, onResetPage]
   );
 
+  // 시작 날짜 필터 핸들러
   const handleFilterStartDate = useCallback(
     (newValue: IDatePickerControl) => {
+      // 페이지 리셋 및 필터 상태 업데이트
       onResetPage();
       filters.setState({ startTime: newValue });
     },
     [filters, onResetPage]
   );
 
+  // 종료 날짜 필터 핸들러
   const handleFilterEndDate = useCallback(
     (newValue: IDatePickerControl) => {
+      // 페이지 리셋 및 필터 상태 업데이트
       onResetPage();
       filters.setState({ endTime: newValue });
     },
@@ -80,6 +88,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
         direction={{ xs: 'column', md: 'row' }}
         sx={{ p: 2.5, pr: { xs: 2.5, md: 1 } }}
       >
+        {/* 카테고리 필터 */}
         <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 180 } }}>
           <InputLabel htmlFor="invoice-filter-service-select-label">카테고리</InputLabel>
 
@@ -105,6 +114,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
            </Select>
         </FormControl>
 
+        {/* 시작 날짜 필터 */}
         <DatePicker
           label="등록일"
           format="YYYY/MM/DD"
@@ -114,6 +124,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
           sx={{ maxWidth: { md: 180 } }}
         />
 
+        {/* 종료 날짜 필터 */}
         <DatePicker
           label="종료일"
           format="YYYY/MM/DD"
@@ -135,6 +146,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
           }}
         />
 
+        {/* 검색 필터 */}
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
             fullWidth
@@ -150,12 +162,14 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
             }}
           />
 
+          {/* 추가 옵션 버튼 */}
           <IconButton onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </Stack>
       </Stack>
 
+      {/* 추가 옵션 팝오버 */}
       <CustomPopover
         open={popover.open}
         anchorEl={popover.anchorEl}
@@ -170,7 +184,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
               }}
             >
               <Iconify icon="solar:printer-minimalistic-bold" />
-              Print
+              인쇄
             </MenuItem>
 
             <MenuItem
@@ -179,7 +193,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
               }}
             >
               <Iconify icon="solar:import-bold" />
-              Import
+              데이터 입력
             </MenuItem>
 
             <MenuItem
@@ -188,7 +202,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
               }}
             >
               <Iconify icon="solar:export-bold" />
-              Export
+              데이터 출력
             </MenuItem>
           </MenuList>
         </MenuList>

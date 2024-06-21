@@ -11,7 +11,6 @@ import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import {paths} from 'src/routes/paths';
-import {useRouter} from 'src/routes/hooks';
 
 import {useBoolean} from 'src/hooks/use-boolean';
 
@@ -25,7 +24,6 @@ import {ConfirmDialog} from 'src/components/custom-dialog';
 import {CustomBreadcrumbs} from 'src/components/custom-breadcrumbs';
 import {
   emptyRows,
-  rowInPage,
   TableNoData,
   getComparator,
   TableEmptyRows,
@@ -48,6 +46,7 @@ import type {RBoard, RBoardCategory} from "../../../generated/swagger/swagger.ap
 
 // ----------------------------------------------------------------------
 
+{/* 테이블 헤더 데이터 */}
 const TABLE_HEAD = [
   {id: "id", label: "ID", align: "left"},
   {id: "title", label: "제목", align: "left", width: 220},
@@ -61,96 +60,80 @@ const TABLE_HEAD = [
 // ----------------------------------------------------------------------
 
 export function BoardListView() {
-  const router = useRouter();
+  // 상태 정의
+  const [selectedId, setSelectedId] = useState<number | undefined>();
+  const [tableData, setTableData] = useState<RBoard[]>([]);
+  const [detailData, setDetailData] = useState<RBoard>();
+  const [categories, setCategories] = useState<RBoardCategory[]>([]);
 
+  // Boolean 상태 훅들
   const confirm = useBoolean();
   const loading = useBoolean();
   const openNew = useBoolean();
   const openView = useBoolean();
   const openEdit = useBoolean();
 
+  // 공지사항 게시판 Context에서 필요한 정보들을 가져옴
   const {
-    table,
-    denseHeight,
-
-    defaultFilters,
-    filters,
-    handleFilters,
-    handleResetFilters,
-
-    searchParams,
-    paramQuery,
-    paramStartDate,
-    paramEndDate,
+    table, // use-table 훅
+    denseHeight, // 밀집 높이
+    filters,// 필터 관리
   } = useBoardManagerContext();
 
-  const [selectedId, setSelectedId] = useState<number | undefined>();
-  const [tableData, setTableData] = useState<RBoard[]>([]);
-  const [detailData, setDetailData] = useState<RBoard>();
-  const [categories, setCategories] = useState<RBoardCategory[]>([]);
-
+  // 페이지 데이터를 불러오는 함수
   const loadData = useCallback(async () => {
-    loading.onTrue();
-    // setTableData([]);
+    loading.onTrue();  // 로딩 상태를 true로 설정
     let _query = '';
     if (filters.state.query && filters.state.query.length > 1) {
       _query = filters.state.query;
     }
-    console.log(filters.state.startTime, 'filters.state.startTim');
-    console.log(filters.state.endTime, 'filters.state.endTime');
     const {data} = await Swagger.api.pageBoard({
-      size: table.rowsPerPage,
-      page: table.page,
-      query: _query,
-      startTime: fISO(filters.state.startTime),
-      endTime: fISO(filters.state.endTime),
+      size: table.rowsPerPage, // 페이지 크기 기본: 10
+      page: table.page, // 현재 페이지 0번 부터 시작
+      query: _query, // 검색어
+      startTime: fISO(filters.state.startTime), // 시작일
+      endTime: fISO(filters.state.endTime), // 종료일
       categoryIds:
         filters.state.categoryIds !== undefined
           ? filters.state.categoryIds
             .filter((id): id is number => true)
-          : []
+          : [] // 카테고리
     });
-    console.log(data.content, 'on load table')
-    setTableData(data.content || []);
-    table.setRowsPerPage(data.size);
-    table.setPage(data.page);
-    table.setTotal(data.totalElements)
+    setTableData(data.content || []); // 테이블 데이터를 설정
+    table.setRowsPerPage(data.size); // 페이지 사이즈
+    table.setPage(data.page); // 현재 페이지
+    table.setTotal(data.totalElements); // 총수량
     loading.onFalse();
   }, [filters.state.categoryIds, filters.state.endTime, filters.state.query, filters.state.startTime, loading, table]);
 
+  // 카테고리 데이터를 불러오는 함수
   const loadCategoryData = useCallback(async () => {
     try {
-      const {data} = await Swagger.api.listBoardCategory();
+      const {data} = await Swagger.api.listBoardCategory(); // 카테고리 호출
       if (data) {
         setCategories(data);
       }
-      handleFilters("categories", []);
     } catch (e) {
       console.error(e);
     }
-  }, [handleFilters]);
+  }, []);
 
+  // 상세 데이터를 불러오는 함수
   const loadDetailData = useCallback(async (id: number) => {
-    const {data} = await Swagger.api.getBoardById(id);
+    const {data} = await Swagger.api.getBoardById(id); // 상세 호출
     setDetailData(data);
   }, []);
 
-
+  // 데이터와 카테고리를 리셋하는 함수
   const handleReset = useCallback(async () => {
     loadData();
     loadCategoryData();
   }, [loadCategoryData, loadData]);
 
-  const handleCloseDrawer = () => {
-    openNew.onFalse();
-    openView.onFalse();
-    openEdit.onFalse();
-    setSelectedId(undefined);
-  };
-
-
+  // 필터 날짜 에러 확인
   const dateError = fIsAfter(filters.state.startTime, filters.state.endTime);
 
+  // 필터를 적용한 데이터
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
@@ -158,15 +141,16 @@ export function BoardListView() {
     dateError,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
-
+  // 필터 리셋 가능한지 여부 확인
   const canReset =
     !!filters.state.query ||
     filters.state.categoryIds.length > 0 ||
     (!!filters.state.startTime && !!filters.state.endTime);
 
+  // 게시판 데이터가 없을 경우 표시
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
+  // 행을 삭제하는 함수
   const handleDeleteRow = useCallback(
     async (id: number) => {
       try {
@@ -182,6 +166,7 @@ export function BoardListView() {
     [handleReset]
   );
 
+  // 선택된 행들을 삭제하는 함수
   const handleDeleteRows = useCallback(async () => {
     try {
       if (table.selected) {
@@ -197,6 +182,15 @@ export function BoardListView() {
     }
   }, [handleReset, table.selected]);
 
+  // 드로어(서랍)를 닫는 함수
+  const handleCloseDrawer = useCallback(() => {
+    openNew.onFalse();
+    openView.onFalse();
+    openEdit.onFalse();
+    setSelectedId(undefined);
+  }, [openEdit, openNew, openView]);
+
+  // 새 항목을 열기 위한 함수
   const handleOpenNew = useCallback(
     () => {
       openNew.onTrue();
@@ -207,6 +201,7 @@ export function BoardListView() {
     [openEdit, openNew, openView]
   );
 
+  // 행을 수정하기 위한 함수
   const handleEditRow = useCallback(
     (id: number) => {
       openNew.onFalse();
@@ -217,6 +212,7 @@ export function BoardListView() {
     [openEdit, openNew, openView]
   );
 
+  // 행을 보기 위한 함수
   const handleViewRow = useCallback(
     (id: number) => {
       openNew.onFalse();
@@ -227,6 +223,7 @@ export function BoardListView() {
     [openEdit, openNew, openView]
   );
 
+  // 데이터 로드를 위한 useEffect
   useEffect(() => {
     loadData().then(() => {
     });
@@ -242,14 +239,15 @@ export function BoardListView() {
     filters.state.categoryIds
   ]);
 
+  // 카테고리 데이터 로드를 위한 useEffect
   useEffect(() => {
     loadCategoryData().then(() => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 상세 데이터 로드를 위한 useEffect
   useEffect(() => {
-
     if (selectedId) {
       loadDetailData(selectedId).then(() => {
       });
@@ -258,21 +256,20 @@ export function BoardListView() {
     }
   }, [loadDetailData, selectedId]);
 
-  useEffect(() => {
-    console.log(table, 'table');
-  }, [table]);
-
   return (
     <>
       <DashboardContent>
+        {/* 상단 Breadcrumbs */}
         <CustomBreadcrumbs
-          heading="List"
+          heading="공지사항 게시판"
           links={[
             {name: '대시보드', href: paths.dashboard.root},
             {name: '게시판', href: paths.dashboard.board},
             {name: '목록'},
           ]}
           action={
+          <>
+            {/* 새글 추가 버튼 */}
             <Button
               onClick={handleOpenNew}
               variant="contained"
@@ -280,12 +277,13 @@ export function BoardListView() {
             >
               새글 추가
             </Button>
+          </>
           }
           sx={{mb: {xs: 3, md: 5}}}
         />
 
         <Card>
-
+          {/* 테이블 툴바 콤포넌트 */}
           <BoardTableToolbar
             filters={filters}
             dateError={dateError}
@@ -293,6 +291,7 @@ export function BoardListView() {
             options={{categories}}
           />
 
+          {/* 테이블 필터 결과 콤포넌트 */}
           {canReset && (
             <BoardTableFiltersResult
               filters={filters}
@@ -303,6 +302,7 @@ export function BoardListView() {
           )}
 
           <Box sx={{position: 'relative'}}>
+            {/* 테이블 행 선택 엑션 콤포넌트 */}
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
@@ -315,25 +315,25 @@ export function BoardListView() {
               }}
               action={
                 <Stack direction="row">
-                  <Tooltip title="Sent">
-                    <IconButton color="primary">
+                  <Tooltip title="전송">
+                    <IconButton color="primary" onClick={() => {toast.info('전송')}}>
                       <Iconify icon="iconamoon:send-fill"/>
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Download">
-                    <IconButton color="primary">
+                  <Tooltip title="다운로드">
+                    <IconButton color="primary" onClick={() => {toast.info('다운로드')}}>
                       <Iconify icon="eva:download-outline"/>
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Print">
-                    <IconButton color="primary">
+                  <Tooltip title="프린트">
+                    <IconButton color="primary" onClick={() => {toast.info('프린트')}}>
                       <Iconify icon="solar:printer-minimalistic-bold"/>
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Delete">
+                  <Tooltip title="삭제">
                     <IconButton color="primary" onClick={confirm.onTrue}>
                       <Iconify icon="solar:trash-bin-trash-bold"/>
                     </IconButton>
@@ -343,7 +343,10 @@ export function BoardListView() {
             />
 
             <Scrollbar sx={{minHeight: 444}}>
+              {/* 테이블 */}
               <Table size={table.dense ? 'small' : 'medium'} sx={{minWidth: 800}}>
+
+                {/* 테이블 헤더 */}
                 <TableHeadCustom
                   order={table.order}
                   orderBy={table.orderBy}
@@ -360,6 +363,7 @@ export function BoardListView() {
                 />
 
                 <TableBody>
+                  {/* 테이블 결과 결과 Row */}
                   {dataFiltered
                     .map((row) => (
                       <BoardTableRow
@@ -373,17 +377,19 @@ export function BoardListView() {
                       />
                     ))}
 
+                  {/* 테이블 결과 빈 결과 Row */}
                   <TableEmptyRows
                     height={denseHeight}
                     emptyRows={emptyRows(table.page, table.rowsPerPage, table.total + 1)}
                   />
-
+                  {/* 테이블 결과 데이터가 없을때 */}
                   {!loading.value && <TableNoData notFound={notFound}/>}
                 </TableBody>
               </Table>
             </Scrollbar>
           </Box>
 
+          {/* 테이블 페이지네이션 컴포넌트 */}
           <TablePaginationCustom
             page={table.page}
             dense={table.dense}
@@ -396,6 +402,7 @@ export function BoardListView() {
         </Card>
       </DashboardContent>
 
+      {/* 새글 작성 Drawer */}
       <DrawerWrapper
         title="새글 작성"
         open={openNew.value}
@@ -408,8 +415,9 @@ export function BoardListView() {
           }}/>}
       />
 
+      {/* 수정 Drawer */}
       <DrawerWrapper
-        title="수정"
+        title="수정 하기"
         open={openEdit.value}
         onClose={handleCloseDrawer}
         children={detailData ? <BoardNewEditForm
@@ -427,6 +435,7 @@ export function BoardListView() {
           }}/> : <>존재하지 않음</>}
       />
 
+      {/* 상세 보기 Drawer */}
       <DrawerWrapper
         title="상세 보기"
         open={openView.value}
@@ -434,13 +443,14 @@ export function BoardListView() {
         children={detailData ? <BoardViewBody data={detailData}/> : <>존재하지 않음</>}
       />
 
+      {/* 삭제 확인 다이얼로그 */}
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
         title="삭제"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            정말 <strong> {table.selected.length} </strong>개 데이터를 삭제하겠습니까?
           </>
         }
         action={
@@ -462,6 +472,7 @@ export function BoardListView() {
 
 // ----------------------------------------------------------------------
 
+// 테이블 필터 관리
 type ApplyFilterProps = {
   dateError: boolean;
   inputData: RBoard[];
@@ -481,21 +492,6 @@ function applyFilter({inputData, comparator, filters, dateError}: ApplyFilterPro
   });
 
   inputData = stabilizedThis.map((el) => el[0]);
-
-  // if (query) {
-  //   inputData = inputData.filter(
-  //     (invoice) =>
-  //       invoice.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
-  //   );
-  // }
-
-  if (!dateError) {
-    // if (startTime && endTime) {
-    //   inputData = inputData.filter((invoice) => fIsBetween(invoice.createdAt, startTime, endTime));
-    // }
-  }
-
-  // console.log(inputData, 'on load inputData')
 
   return inputData;
 }

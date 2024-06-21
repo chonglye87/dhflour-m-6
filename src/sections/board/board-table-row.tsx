@@ -30,6 +30,7 @@ type Props = {
   onDeleteRow: () => void;
 };
 
+// 공지사항 게시판 테이블 행 컴포넌트 정의
 export function BoardTableRow({
                                 row,
                                 selected,
@@ -45,6 +46,7 @@ export function BoardTableRow({
   return (
     <>
       <TableRow hover selected={selected}>
+        {/* 선택 체크박스 */}
         <TableCell padding="checkbox">
           <Checkbox
             checked={selected}
@@ -53,14 +55,17 @@ export function BoardTableRow({
           />
         </TableCell>
 
+        {/* 게시글 ID */}
         <TableCell>
           {id}
         </TableCell>
 
+        {/* 게시글 제목 */}
         <TableCell>
           {title}
         </TableCell>
 
+        {/* 카테고리 */}
         <TableCell align="center">
           <Stack direction="row" spacing={1}>
             {categories && categories.map(category => <Chip
@@ -80,10 +85,12 @@ export function BoardTableRow({
           0
         </TableCell>
 
+        {/* 생성일시 */}
         <TableCell align="center">
           {createdAt && fDateTime(createdAt * 1000)}
         </TableCell>
 
+        {/* 액션 버튼 */}
         <TableCell align="right" sx={{px: 1}}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill"/>
@@ -91,6 +98,7 @@ export function BoardTableRow({
         </TableCell>
       </TableRow>
 
+      {/* 액션 팝오버 */}
       <CustomPopover
         open={popover.open}
         anchorEl={popover.anchorEl}
@@ -105,7 +113,7 @@ export function BoardTableRow({
             }}
           >
             <Iconify icon="solar:eye-bold"/>
-            View
+            상세 보기
           </MenuItem>
 
           <MenuItem
@@ -115,7 +123,7 @@ export function BoardTableRow({
             }}
           >
             <Iconify icon="solar:pen-bold"/>
-            Edit
+            수정 하기
           </MenuItem>
 
           <Divider sx={{borderStyle: 'dashed'}}/>
@@ -128,11 +136,12 @@ export function BoardTableRow({
             sx={{color: 'error.main'}}
           >
             <Iconify icon="solar:trash-bin-trash-bold"/>
-            Delete
+            삭제 하기
           </MenuItem>
         </MenuList>
       </CustomPopover>
 
+      {/* 삭제 확인 다이얼로그 */}
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
@@ -140,7 +149,7 @@ export function BoardTableRow({
         content="정말 데이터를 삭제하시겠습니까?"
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
-            삭제하기
+            삭제 하기
           </Button>
         }
       />

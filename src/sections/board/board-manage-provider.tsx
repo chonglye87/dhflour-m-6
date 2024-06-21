@@ -1,29 +1,21 @@
-import {toast} from "sonner";
 import {useLocation} from "react-router-dom";
-import {useMemo, useContext, useCallback, createContext,} from 'react';
+import {useMemo, useContext, createContext,} from 'react';
 
 import {useTable} from "../../components/table";
 import {useSetState} from "../../hooks/use-set-state";
 
+import type {IBoardFilters} from "../../types/board";
 import type {TableProps} from "../../components/table";
-import type {RBoard} from "../../generated/swagger/swagger.api";
 import type {UseSetStateReturn} from "../../hooks/use-set-state";
-import type {IBoardFilters, IBoardFilterValue} from "../../types/board";
-
 
 // ----------------------------------------------------------------------
-type ApplyFilterProps = {
-  inputData: RBoard[];
-  comparator: (a: any, b: any) => number;
-  filters: UseSetStateReturn<IBoardFilters>;
-  dateError: boolean;
-}
 
+// 기본 필터 값 정의
 const defaultFilters: IBoardFilters = {
-  query: "",
-  categoryIds: [],
-  startTime: null,
-  endTime: null,
+  query: "", // 검색어
+  categoryIds: [], // 카테고리 ID
+  startTime: null, // 시작일
+  endTime: null, // 종료일
 };
 
 type Props = {
@@ -38,11 +30,9 @@ type Props = {
   denseHeight: number;
   defaultFilters: IBoardFilters;
   filters: UseSetStateReturn<IBoardFilters>;
-  handleFilters: (name: string, value: IBoardFilterValue) => void;
-  handleResetFilters: () => void;
-
-  onDeleteData: (id: number) => void;
 };
+
+// 초기 상태 정의
 const initialState: Props = {
   searchParams: new URLSearchParams(''),
   paramPage: 0,
@@ -50,6 +40,7 @@ const initialState: Props = {
   paramQuery: '',
   paramStartDate: '',
   paramEndDate: '',
+  // 테이블 훅 초기화
   table: {
     dense: false,
     page: 0,
@@ -66,13 +57,14 @@ const initialState: Props = {
     onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => {},
     onChangeDense: (event: React.ChangeEvent<HTMLInputElement>) => {},
     onUpdatePageDeleteRow: (totalRowsInPage: number) => {},
-    onUpdatePageDeleteRows: ({
-                               totalRowsInPage,
-                               totalRowsFiltered,
-                             }: {
+    onUpdatePageDeleteRows({
+                             totalRowsInPage,
+                             totalRowsFiltered,
+                           }: {
       totalRowsInPage: number;
       totalRowsFiltered: number;
-    }) => {},
+    }) {
+    },
     setPage: () => {},
     setDense: () => {},
     setOrder: () => {},
@@ -89,19 +81,19 @@ const initialState: Props = {
     onResetState: () => {},
     setState: () => {},
     setField: () => {},
-  },
-  handleFilters: (name: string, value: IBoardFilterValue) => {},
-  handleResetFilters: () => {},
-  onDeleteData: (id: number) => {},
+  }
 };
+
+// BoardManagerContext를 생성하여 하위 컴포넌트들이 사용할 수 있게 함
 export const BoardManagerContext = createContext(initialState);
 
+// BoardManagerContext를 사용하기 위한 커스텀 훅
 export const useBoardManagerContext = () => {
   const context = useContext(BoardManagerContext);
 
   if (!context)
     throw new Error(
-      'useBoardManaderContext must be use inside BoardManaderProvider'
+      'useBoardManagerContext must be use inside BoardManaderProvider'
     );
 
   return context;
@@ -139,35 +131,6 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
   // 테이블 밀도 설정에 따라 행 높이를 계산합니다.
   const denseHeight = table.dense ? 56 : 56 + 20;
 
-  // 필터 변경을 처리하는 콜백으로, 변경 시 페이지네이션을 재설정합니다.
-  const handleFilters = useCallback(
-    (name: string, value: IBoardFilterValue) => {
-      table.onResetPage();
-      // setFilters((prevState) => ({
-      //   ...prevState,
-      //   [name]: value,
-      // }));
-    },
-    [table]
-  );
-
-  // 모든 필터를 기본값으로 재설정하는 콜백입니다.
-  const handleResetFilters = useCallback(() => {
-    // setFilters(defaultFilters);
-  }, []);
-
-  // 데이터 삭제를 처리하는 콜백으로, API 호출(주석 처리됨) 및 알림이 포함될 수 있습니다.
-  const onDeleteData = useCallback((id: number) => {
-    try {
-      // const {data} = await Swagger.api.boardDelete(d);
-      // enqueueSnackbar(data.message, {variant: "success"});
-      console.log('delete');
-    } catch (e) {
-      console.error(e);
-      toast.error(e.message);
-    }
-  }, []);
-
   // 성능을 최적화하고 불필요한 렌더링을 방지하기 위해 제공자 값에 메모이제이션을 적용합니다.
   const memoizedValue = useMemo(
     () => ({
@@ -183,10 +146,6 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
 
       defaultFilters, // 필터의 기본값
       filters, // 현재 적용된 필터 상태
-      handleFilters, // 필터 상태를 변경하는 함수
-      handleResetFilters, // 모든 필터를 기본값으로 리셋하는 함수
-
-      onDeleteData // 데이터 삭제를 처리하는 함수
     }),
     [
       searchParams,
@@ -198,9 +157,7 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
       table,
       denseHeight,
       filters,
-      handleFilters,
-      handleResetFilters,
-      onDeleteData]
+    ]
   );
 
   return (
@@ -209,44 +166,3 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
     </BoardManagerContext.Provider>
   );
 }
-
-export const applyFilter = ({
-                              inputData,
-                              comparator,
-                              filters: f,
-                              dateError
-                            }: ApplyFilterProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const {startTime, endTime} = f;
-  // console.log(inputData, 'inputData');
-  // console.log(f, 'filter');
-  //
-  // const stabilizedThis = inputData.map((el, index) => [el, index] as const);
-  //
-  // stabilizedThis.sort((a, b) => {
-  //   const order = comparator(a[0], b[0]);
-  //   if (order !== 0) return order;
-  //   return a[1] - b[1];
-  // });
-  // inputData = stabilizedThis.map((el) => el[0]);
-
-  // if (name) {
-  //   inputData = inputData.filter(
-  //     (user) => user.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
-  //   );
-  // }
-  //
-  // if (status !== 'all') {
-  //   inputData = inputData.filter((user) => user.status === status);
-  // }
-  //
-  // if (role.length) {
-  //   inputData = inputData.filter((user) => role.includes(user.role));
-  // }
-  if (!dateError) {
-    // if (startTime && endTime) {
-    //   inputData = inputData.filter((invoice) => fIsBetween(invoice.createdAt, startTime, endTime));
-    // }
-  }
-  return inputData;
-};
