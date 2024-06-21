@@ -18,7 +18,7 @@
     "re:build": "yarn rm:all && yarn install && yarn build",
     "re:build-npm": "npm run rm:all && npm install && npm run build",
     "dev:host": "vite --host",
-    "api-build": "npx swagger-typescript-api -p http://localhost:8080/api-docs -o ./src/generated/swagger -n swagger.api.ts --axios"
+    "api-build": "npx swagger-typescript-api -p http://localhost:8000/api-docs -o ./src/generated/swagger -n swagger.api.ts --axios"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",

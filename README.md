@@ -143,7 +143,7 @@ VITE_SERVER_URL=https://api.example.com
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "api-build": "npx swagger-typescript-api -p http://localhost:8080/api-docs -o ./src/generated/swagger -n swagger.api.ts --axios"
+    "api-build": "npx swagger-typescript-api -p http://localhost:8000/api-docs -o ./src/generated/swagger -n swagger.api.ts --axios"
   },
 ```
 ```

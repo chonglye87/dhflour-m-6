@@ -9,25 +9,12 @@
  * ---------------------------------------------------------------
  */
 
-export interface RequestRBoard {
-  /**
-   * 제목
-   * @maxLength 255
-   */
-  title: string;
-  /** 내용 */
-  content?: string;
+export interface RequestUpdatePassword {
+  oldPassword?: string;
+  newPassword?: string;
 }
 
-export interface RequestRBoardCategory {
-  /**
-   * 카테고리명
-   * @example "공지"
-   */
-  name: string;
-}
-
-export interface RequestSignUp {
+export interface RequestRUser {
   /**
    * 이메일
    * @maxLength 255
@@ -69,18 +56,22 @@ export interface RequestSignUp {
   marketing?: boolean;
 }
 
-export interface AuthenticationResponse {
+export interface RequestRBoard {
   /**
-   * JWT Access Token
-   * @example "접근 토큰"
+   * 제목
+   * @maxLength 255
    */
-  accessToken: string;
+  title: string;
+  /** 내용 */
+  content?: string;
+}
+
+export interface RequestRBoardCategory {
   /**
-   * JWT Refresh Token
-   * @example "접근 토큰"
+   * 카테고리명
+   * @example "공지"
    */
-  refreshToken: string;
-  user: RUser;
+  name: string;
 }
 
 export interface RUser {
@@ -180,6 +171,20 @@ export interface RefreshTokenRequest {
   refreshToken?: string;
 }
 
+export interface AuthenticationResponse {
+  /**
+   * JWT Access Token
+   * @example "접근 토큰"
+   */
+  accessToken: string;
+  /**
+   * JWT Refresh Token
+   * @example "접근 토큰"
+   */
+  refreshToken: string;
+  user: RUser;
+}
+
 export interface AuthenticationRequest {
   /**
    * email
@@ -193,10 +198,82 @@ export interface AuthenticationRequest {
   password: string;
 }
 
+export interface RequestSignUp {
+  /**
+   * 이메일
+   * @maxLength 255
+   * @example "test@gmail.com"
+   */
+  email: string;
+  /**
+   * 사용자명
+   * @maxLength 255
+   * @example "홍길동"
+   */
+  username: string;
+  /**
+   * 휴대폰번호
+   * @maxLength 255
+   * @example "01011112222"
+   */
+  mobile: string;
+  /**
+   * 비밀번호
+   * @maxLength 255
+   * @example "Yuio1234!"
+   */
+  password: string;
+  /**
+   * 이용약관동의 여부
+   * @example true
+   */
+  policy: boolean;
+  /**
+   * 개인정보처리방침동의 여부
+   * @example true
+   */
+  privacy: boolean;
+  /**
+   * 마케팅수신동의 여부
+   * @example true
+   */
+  marketing?: boolean;
+}
+
 export interface UserSampleBody {
   /** @format int64 */
   id?: number;
   username?: string;
+}
+
+/** 사용자 페이지네이션 응답 */
+export interface RUserPaginationResponse {
+  /**
+   * 현재 페이지 번호
+   * @format int32
+   * @example 0
+   */
+  page?: number;
+  /**
+   * 페이지 크기
+   * @format int32
+   * @example 20
+   */
+  size?: number;
+  /**
+   * 전체 요소 수
+   * @format int64
+   * @example 100
+   */
+  totalElements?: number;
+  /**
+   * 전체 페이지 수
+   * @format int32
+   * @example 5
+   */
+  totalPages?: number;
+  /** 페이지에 포함된 콘텐츠 */
+  content?: RUser[];
 }
 
 export interface RBoardCategory {
@@ -232,7 +309,7 @@ export interface RBoardCategory {
 }
 
 /** 게시판 페이지네이션 응답 */
-export interface BoardPaginationResponse {
+export interface RBoardPaginationResponse {
   /**
    * 현재 페이지 번호
    * @format int32
@@ -306,7 +383,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private format?: ResponseType;
 
   constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8080" });
+    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8000" });
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
@@ -395,7 +472,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title API 문서
  * @version v1.0.0
- * @baseUrl http://localhost:8080
+ * @baseUrl http://localhost:8000
  *
  * 대한제분 API, powered by Spring Boot 3
  */
@@ -415,6 +492,82 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   api = {
+    /**
+     * @description 사용자의 비밀번호를 수정합니다.
+     *
+     * @tags 회원 API
+     * @name UpdatePassword
+     * @summary [user-6] 비밀번호 수정 (Update Password)
+     * @request PUT:/api/v1/user/{id}/password
+     * @secure
+     */
+    updatePassword: (id: number, data: RequestUpdatePassword, params: RequestParams = {}) =>
+      this.request<RequestUpdatePassword, any>({
+        path: `/api/v1/user/${id}/password`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 사용자를 ID로 조회합니다.
+     *
+     * @tags 회원 API
+     * @name GetUserById
+     * @summary [user-2] 사용자 상세 조회 (Get by ID)
+     * @request GET:/api/v1/user/{id}
+     * @secure
+     */
+    getUserById: (id: number, params: RequestParams = {}) =>
+      this.request<RUser, any>({
+        path: `/api/v1/user/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 사용자를 수정합니다.
+     *
+     * @tags 회원 API
+     * @name UpdateUser
+     * @summary [user-4] 사용자 수정 (Update)
+     * @request PUT:/api/v1/user/{id}
+     * @secure
+     */
+    updateUser: (id: number, data: RequestRUser, params: RequestParams = {}) =>
+      this.request<RequestRUser, any>({
+        path: `/api/v1/user/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 기존 사용자를 삭제합니다.
+     *
+     * @tags 회원 API
+     * @name DeleteUser
+     * @summary [user-5] 사용자 삭제 (Delete)
+     * @request DELETE:/api/v1/user/{id}
+     * @secure
+     */
+    deleteUser: (id: number, params: RequestParams = {}) =>
+      this.request<object, any>({
+        path: `/api/v1/user/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
     /**
      * @description 게시판를 ID로 조회합니다.
      *
@@ -528,18 +681,60 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description 회원가입을 합니다.
+     * @description 사용자 목록 조회합니다.
      *
      * @tags 회원 API
-     * @name SignUp
-     * @summary [user-1] 회원가입 (Sign Up)
-     * @request POST:/api/v1/user
+     * @name PageUser
+     * @summary [user-1] 사용자 페이지 조회 (Pagination)
+     * @request GET:/api/v1/user
+     * @secure
      */
-    signUp: (data: RequestSignUp, params: RequestParams = {}) =>
-      this.request<AuthenticationResponse, any>({
+    pageUser: (
+      query?: {
+        /**
+         * Page Size 페이지 크기 (default : 20)
+         * @format int32
+         * @example 20
+         */
+        size?: number;
+        /**
+         * 현재 페이지 0부터 (Current Page)  현재 페이지 (default : 0)
+         * @format int32
+         * @example 0
+         */
+        page?: number;
+        /**
+         * 정렬 (Sort Page)
+         * @example "created_at,desc"
+         */
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<RUserPaginationResponse, any>({
+        path: `/api/v1/user`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 새로운 사용자를 생성합니다.
+     *
+     * @tags 회원 API
+     * @name CreateUser
+     * @summary [user-3] 사용자 생성 (Create)
+     * @request POST:/api/v1/user
+     * @secure
+     */
+    createUser: (data: RequestRUser, params: RequestParams = {}) =>
+      this.request<RUser, any>({
         path: `/api/v1/user`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -564,7 +759,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<BoardPaginationResponse, any>({
+      this.request<RBoardPaginationResponse, any>({
         path: `/api/v1/board-category`,
         method: "GET",
         query: query,
@@ -624,7 +819,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<BoardPaginationResponse, any>({
+      this.request<RBoardPaginationResponse, any>({
         path: `/api/v1/board`,
         method: "GET",
         query: query,
@@ -682,6 +877,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     authAccessToken: (data: AuthenticationRequest, params: RequestParams = {}) =>
       this.request<AuthenticationResponse, any>({
         path: `/api/v1/authenticate/access-token`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 회원가입을 합니다.
+     *
+     * @tags 인증 API
+     * @name SignUp
+     * @summary [auth-3] 회원가입 (Sign Up)
+     * @request POST:/api/v1/authenticate
+     */
+    signUp: (data: RequestSignUp, params: RequestParams = {}) =>
+      this.request<AuthenticationResponse, any>({
+        path: `/api/v1/authenticate`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -820,29 +1033,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description JWT를 통해 인증된 사용자 정보 또는 기본 정보를 조회합니다.
-     *
-     * @tags 인증 API
-     * @name GetOptionalUserInfo
-     * @summary 옵션 사용자 정보 조회
-     * @request GET:/api/v1/authenticate/optional-info
-     * @secure
-     */
-    getOptionalUserInfo: (params: RequestParams = {}) =>
-      this.request<RUser, any>({
-        path: `/api/v1/authenticate/optional-info`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
      * @description JWT를 통해 인증된 사용자 정보를 조회합니다.
      *
      * @tags 인증 API
      * @name GetAuthenticatedUserInfo
-     * @summary 인증된 사용자 정보 조회
+     * @summary [auth-3] 인증된 사용자 정보 조회
      * @request GET:/api/v1/authenticate/authenticated-info
      * @secure
      */
