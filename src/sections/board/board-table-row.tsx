@@ -136,11 +136,11 @@ export function BoardTableRow({
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title="Delete"
-        content="Are you sure want to delete?"
+        title="삭제"
+        content="정말 데이터를 삭제하시겠습니까?"
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
-            Delete
+            삭제하기
           </Button>
         }
       />

@@ -13,6 +13,7 @@ export type UseTableProps = {
   defaultSelected?: string[];
   defaultRowsPerPage?: number;
   defaultCurrentPage?: number;
+  total?: number;
 };
 
 export function useTable(props?: UseTableProps): UseTableReturn {
@@ -23,6 +24,8 @@ export function useTable(props?: UseTableProps): UseTableReturn {
   const [orderBy, setOrderBy] = useState(props?.defaultOrderBy || 'name');
 
   const [rowsPerPage, setRowsPerPage] = useState(props?.defaultRowsPerPage || 5);
+
+  const [total, setTotal] = useState(props?.total || 0);
 
   const [order, setOrder] = useState<'asc' | 'desc'>(props?.defaultOrder || 'asc');
 
@@ -120,6 +123,7 @@ export function useTable(props?: UseTableProps): UseTableReturn {
     page,
     orderBy,
     rowsPerPage,
+    total,
     //
     selected,
     onSelectRow,
@@ -139,5 +143,6 @@ export function useTable(props?: UseTableProps): UseTableReturn {
     setOrderBy,
     setSelected,
     setRowsPerPage,
+    setTotal,
   };
 }

@@ -11,7 +11,6 @@ import type {UseSetStateReturn} from "../../hooks/use-set-state";
 import type {IBoardFilters, IBoardFilterValue} from "../../types/board";
 
 
-const ROW_COUNT = 20;
 // ----------------------------------------------------------------------
 type ApplyFilterProps = {
   inputData: RBoard[];
@@ -58,6 +57,7 @@ const initialState: Props = {
     order: 'asc',
     orderBy: 'id',
     selected: [],
+    total: 0,
     onSelectRow: (id: string | number) => {},
     onSelectAllRows: (checked: boolean, newSelecteds: string[]) => {},
     onResetPage: () => {},
@@ -79,6 +79,7 @@ const initialState: Props = {
     setOrderBy: () => {},
     setSelected: () => {},
     setRowsPerPage: () => {},
+    setTotal: () => {},
   },
   denseHeight: 72,
   defaultFilters,
@@ -121,7 +122,7 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
 
   // URL에서 페이징 및 필터링 매개변수를 추출하고, 없을 경우 기본값을 사용합니다.
   const paramPage = searchParams.get("page") ? Number(searchParams.get("page")) : 0;
-  const paramSize = searchParams.get("size") ? Number(searchParams.get("size")) : ROW_COUNT;
+  const paramSize = searchParams.get("size") ? Number(searchParams.get("size")) : 10;
   const paramQuery = searchParams.get("query") || "";
   const paramStartDate = searchParams.get("startTime") || "";
   const paramEndDate = searchParams.get("endTime") || "";
@@ -133,11 +134,10 @@ export function BoardManagerProvider({children}: ManagerProviderProps) {
     defaultRowsPerPage: paramSize,
     defaultCurrentPage: paramPage,
   });
-  // const [filters, setFilters] = useState(defaultFilters); // 필터 객체
   const filters = useSetState<IBoardFilters>(defaultFilters);
 
   // 테이블 밀도 설정에 따라 행 높이를 계산합니다.
-  const denseHeight = table.dense ? 52 : 72;
+  const denseHeight = table.dense ? 56 : 56 + 20;
 
   // 필터 변경을 처리하는 콜백으로, 변경 시 페이지네이션을 재설정합니다.
   const handleFilters = useCallback(

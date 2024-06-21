@@ -1,3 +1,4 @@
+import {toast} from "sonner";
 import {useState, useEffect, useCallback} from 'react';
 
 import Box from '@mui/material/Box';
@@ -88,9 +89,9 @@ export function BoardListView() {
   const [detailData, setDetailData] = useState<RBoard>();
   const [categories, setCategories] = useState<RBoardCategory[]>([]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     loading.onTrue();
-    setTableData([]);
+    // setTableData([]);
     let _query = '';
     if (filters.state.query && filters.state.query.length > 1) {
       _query = filters.state.query;
@@ -107,15 +108,14 @@ export function BoardListView() {
             .filter((id): id is number => true)
           : []
     });
-    console.log(table.rowsPerPage, 'table.rowsPerPage');
-    console.log(table.page, 'table.page');
-    console.log(data, 'board');
     setTableData(data.content || []);
-    // table.setPageMetadata(data.metadata);
+    table.setRowsPerPage(data.size);
+    table.setPage(data.page);
+    table.setTotal(data.totalElements)
     loading.onFalse();
-  };
+  }, [filters.state.categoryIds, filters.state.endTime, filters.state.query, filters.state.startTime, loading, table]);
 
-  const loadCategoryData = async () => {
+  const loadCategoryData = useCallback(async () => {
     try {
       const {data} = await Swagger.api.listBoardCategory();
       if (data) {
@@ -125,18 +125,18 @@ export function BoardListView() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [handleFilters]);
 
-  const loadDetailData = async (id: number) => {
+  const loadDetailData = useCallback(async (id: number) => {
     const {data} = await Swagger.api.getBoardById(id);
     setDetailData(data);
-  };
+  }, []);
 
 
-  const handleReset = async () => {
+  const handleReset = useCallback(async () => {
     loadData();
     loadCategoryData();
-  };
+  }, [loadCategoryData, loadData]);
 
   const handleCloseDrawer = () => {
     openNew.onFalse();
@@ -165,34 +165,34 @@ export function BoardListView() {
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = useCallback(
-    (id: number) => {
-      // const deleteRow = tableData.filter((row) => row.id !== id);
-      //
-      // toast.success('Delete success!');
-      //
-      // setTableData(deleteRow);
-      //
-      // table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: number) => {
+      try {
+        const response = await Swagger.api.deleteBoard(id);
+        if(response.status === 200) {
+          toast.success('삭제되었습니다.');
+          handleReset().then(()=> {});
+        }
+      } catch (e) {
+        toast.error(e.message);
+      }
     },
-    [
-      // dataInPage.length, table, tableData
-    ]
+    [handleReset]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    // const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    //
-    // toast.success('Delete success!');
-    //
-    // setTableData(deleteRows);
-    //
-    // table.onUpdatePageDeleteRows({
-    //   totalRowsInPage: dataInPage.length,
-    //   totalRowsFiltered: dataFiltered.length,
-    // });
-  }, [
-    // dataFiltered.length, dataInPage.length, table, tableData
-  ]);
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      if (table.selected) {
+        const selectedIdsAsNumbers = table.selected.map(id => Number(id));
+        const response = await Swagger.api.deleteBoards(selectedIdsAsNumbers);
+        if (response.status === 200) {
+          toast.success('삭제되었습니다.');
+          handleReset().then(()=> {});
+        }
+      }
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }, [handleReset, table.selected]);
 
   const handleOpenNew = useCallback(
     () => {
@@ -253,7 +253,11 @@ export function BoardListView() {
     } else {
       setDetailData(undefined);
     }
-  }, [selectedId]);
+  }, [loadDetailData, selectedId]);
+
+  useEffect(() => {
+    console.log(table, 'table');
+  }, [table]);
 
   return (
     <>
@@ -354,10 +358,6 @@ export function BoardListView() {
 
                 <TableBody>
                   {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
                     .map((row) => (
                       <BoardTableRow
                         key={row.id}
@@ -371,11 +371,11 @@ export function BoardListView() {
                     ))}
 
                   <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    height={denseHeight}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, table.total + 1)}
                   />
 
-                  <TableNoData notFound={notFound}/>
+                  {!loading.value && <TableNoData notFound={notFound}/>}
                 </TableBody>
               </Table>
             </Scrollbar>
@@ -384,7 +384,7 @@ export function BoardListView() {
           <TablePaginationCustom
             page={table.page}
             dense={table.dense}
-            count={dataFiltered.length}
+            count={table.total}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             onChangeDense={table.onChangeDense}
@@ -434,7 +434,7 @@ export function BoardListView() {
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title="Delete"
+        title="삭제"
         content={
           <>
             Are you sure want to delete <strong> {table.selected.length} </strong> items?
@@ -449,7 +449,7 @@ export function BoardListView() {
               confirm.onFalse();
             }}
           >
-            Delete
+            삭제하기
           </Button>
         }
       />
@@ -467,7 +467,7 @@ type ApplyFilterProps = {
 };
 
 function applyFilter({inputData, comparator, filters, dateError}: ApplyFilterProps) {
-  const {query, startTime, endTime} = filters;
+  const {query, startTime, endTime, categoryIds} = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -479,12 +479,12 @@ function applyFilter({inputData, comparator, filters, dateError}: ApplyFilterPro
 
   inputData = stabilizedThis.map((el) => el[0]);
 
-  if (query) {
-    inputData = inputData.filter(
-      (invoice) =>
-        invoice.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
-    );
-  }
+  // if (query) {
+  //   inputData = inputData.filter(
+  //     (invoice) =>
+  //       invoice.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
+  //   );
+  // }
 
   if (!dateError) {
     if (startTime && endTime) {

@@ -1095,5 +1095,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         ...params,
       }),
+
+    /**
+     * @description 기존 게시판 여러 개를 삭제합니다.
+     *
+     * @tags 게시판 API
+     * @name DeleteBoards
+     * @summary [board-6] 여러 게시판 삭제 (Delete All)
+     * @request DELETE:/api/v1/board/delete-all
+     * @secure
+     */
+    deleteBoards: (data: number[], params: RequestParams = {}) =>
+      this.request<object, any>({
+        path: `/api/v1/board/delete-all`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
   };
 }

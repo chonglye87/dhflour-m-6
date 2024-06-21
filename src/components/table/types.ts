@@ -6,6 +6,7 @@ export type TableProps = {
   rowsPerPage: number;
   order: 'asc' | 'desc';
   orderBy: string;
+  total: number;
   //
   selected: string[];
   onSelectRow: (id: string | number) => void;
@@ -31,6 +32,7 @@ export type TableProps = {
   setOrderBy: React.Dispatch<React.SetStateAction<string>>;
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   setRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
+  setTotal: React.Dispatch<React.SetStateAction<number>>;
 };
 
 
@@ -41,6 +43,7 @@ export const initialTable: TableProps = {
   order: 'asc',
   orderBy: 'id',
   selected: [],
+  total: 0,
   onSelectRow: (id: string | number) => {},
   onSelectAllRows: (checked: boolean, newSelecteds: string[]) => {},
   onResetPage: () => {},
@@ -62,4 +65,5 @@ export const initialTable: TableProps = {
   setOrderBy: () => {},
   setSelected: () => {},
   setRowsPerPage: () => {},
+  setTotal: () => {}
 };

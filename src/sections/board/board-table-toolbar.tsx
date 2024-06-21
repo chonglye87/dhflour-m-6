@@ -22,9 +22,6 @@ import Select, {type SelectChangeEvent} from "@mui/material/Select";
 import {Iconify} from 'src/components/iconify';
 import {usePopover, CustomPopover} from 'src/components/custom-popover';
 
-
-
-
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -110,6 +107,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
 
         <DatePicker
           label="등록일"
+          format="YYYY/MM/DD"
           value={filters.state.endTime}
           onChange={handleFilterStartDate}
           slotProps={{ textField: { fullWidth: true } }}
@@ -118,6 +116,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
 
         <DatePicker
           label="종료일"
+          format="YYYY/MM/DD"
           value={filters.state.endTime}
           onChange={handleFilterEndDate}
           slotProps={{
