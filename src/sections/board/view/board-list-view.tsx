@@ -11,7 +11,6 @@ import IconButton from '@mui/material/IconButton';
 
 import {paths} from 'src/routes/paths';
 import {useRouter} from 'src/routes/hooks';
-import {RouterLink} from 'src/routes/components';
 
 import {useBoolean} from 'src/hooks/use-boolean';
 
@@ -36,9 +35,11 @@ import {
 
 import {Swagger} from "../../../utils/API";
 import {BoardTableRow} from '../board-table-row';
+import BoardNewEditForm from "./board-new-edit-form";
 import {BoardTableToolbar} from '../board-table-toolbar';
 import {useBoardManagerContext} from "../board-manage-provider";
 import {BoardTableFiltersResult} from '../board-table-filters-result';
+import {DrawerWrapper} from "../../../components/drawer/DrawerWrapper";
 
 import type {IBoardFilters} from "../../../types/board";
 import type {RBoard, RBoardCategory} from "../../../generated/swagger/swagger.api";
@@ -59,8 +60,13 @@ const TABLE_HEAD = [
 
 export function BoardListView() {
   const router = useRouter();
+
   const confirm = useBoolean();
   const loading = useBoolean();
+  const openNew = useBoolean();
+  const openView = useBoolean();
+  const openEdit = useBoolean();
+
   const {
     table,
     denseHeight,
@@ -75,7 +81,10 @@ export function BoardListView() {
     paramStartDate,
     paramEndDate,
   } = useBoardManagerContext();
+
+  const [selectedId, setSelectedId] = useState<number | undefined>();
   const [tableData, setTableData] = useState<RBoard[]>([]);
+  const [detailData, setDetailData] = useState<RBoard>();
   const [categories, setCategories] = useState<RBoardCategory[]>([]);
 
   const loadData = async () => {
@@ -117,10 +126,31 @@ export function BoardListView() {
     }
   };
 
+  const loadDetailData = async (id: number) => {
+    const {data} = await Swagger.api.getBoardById(id);
+    setDetailData(data);
+  };
+
+
   const handleReset = async () => {
     loadData();
     loadCategoryData();
   };
+
+  const handleCloseDrawer = () => {
+    openNew.onFalse();
+    openView.onFalse();
+    openEdit.onFalse();
+    setSelectedId(undefined);
+  };
+
+
+  const handleOpenView = () => {
+    openNew.onFalse();
+    openView.onTrue();
+    openEdit.onFalse();
+  };
+
 
   const dateError = fIsAfter(filters.state.startTime, filters.state.endTime);
 
@@ -170,11 +200,24 @@ export function BoardListView() {
     // dataFiltered.length, dataInPage.length, table, tableData
   ]);
 
+  const handleOpenNew = useCallback(
+    () => {
+      openNew.onTrue();
+      openView.onFalse();
+      openEdit.onFalse();
+      setSelectedId(undefined);
+    },
+    [openEdit, openNew, openView]
+  );
+
   const handleEditRow = useCallback(
     (id: number) => {
-      router.push(paths.dashboard.board);
+      openNew.onFalse();
+      openView.onFalse();
+      openEdit.onTrue();
+      setSelectedId(id)
     },
-    [router]
+    [openEdit, openNew, openView]
   );
 
   const handleViewRow = useCallback(
@@ -198,11 +241,19 @@ export function BoardListView() {
     filters.state.categoryIds
   ]);
 
-
   useEffect(() => {
     loadCategoryData().then(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+
+    if (selectedId) {
+      loadDetailData(selectedId).then(() => {});
+    } else {
+      setDetailData(undefined);
+    }
+  }, [selectedId]);
 
   return (
     <>
@@ -216,8 +267,7 @@ export function BoardListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.invoice.new}
+              onClick={handleOpenNew}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line"/>}
             >
@@ -342,6 +392,37 @@ export function BoardListView() {
           />
         </Card>
       </DashboardContent>
+
+      <DrawerWrapper
+        title="새글 작성"
+        open={openNew.value}
+        onClose={handleCloseDrawer}
+        children={<BoardNewEditForm
+          categories={categories}
+          onEnd={() => {
+            handleCloseDrawer();
+            handleReset();
+          }}/>}
+        />
+
+      <DrawerWrapper
+        title="수정"
+        open={openEdit.value}
+        onClose={handleCloseDrawer}
+        children={detailData && <BoardNewEditForm
+          categories={categories}
+          id={selectedId}
+          currentData={{
+            title: detailData.title,
+            content: detailData.content,
+            categoryIds: detailData.categories && detailData.categories.map(category => category.id)
+          }}
+          isEdit
+          onEnd={() => {
+            handleCloseDrawer();
+            handleReset();
+          }}/>}
+        />
 
       <ConfirmDialog
         open={confirm.value}

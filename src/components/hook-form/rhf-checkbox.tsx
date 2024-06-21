@@ -79,7 +79,7 @@ type RHFMultiCheckboxProps = FormGroupProps & {
   };
   options: {
     label: string;
-    value: string;
+    value: any;
   }[];
 };
 
