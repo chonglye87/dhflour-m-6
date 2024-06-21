@@ -21,6 +21,17 @@ type Props = {
 };
 
 export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx }: Props) {
+
+  const handleRemoveCategory = useCallback(
+    (inputValue: number) => {
+      const newValue = filters.state.categoryIds.filter((item) => item !== inputValue);
+
+      onResetPage();
+      filters.setState({ categoryIds: newValue });
+    },
+    [filters, onResetPage]
+  );
+
   const handleRemoveKeyword = useCallback(() => {
     onResetPage();
     filters.setState({ query: '' });
@@ -33,10 +44,15 @@ export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx
 
   return (
     <FiltersResult totalResults={totalResults} onReset={filters.onResetState} sx={sx}>
+      <FiltersBlock label="카테고리:" isShow={!!filters.state.categoryIds.length}>
+        {filters.state.categoryIds.map((categoryId) => (
+          <Chip {...chipProps} key={categoryId} label={categoryId} onDelete={() => handleRemoveCategory(categoryId)} />
+        ))}
+      </FiltersBlock>
 
 
       <FiltersBlock
-        label="Date:"
+        label="기간:"
         isShow={Boolean(filters.state.startTime && filters.state.endTime)}
       >
         <Chip
@@ -46,7 +62,7 @@ export function BoardTableFiltersResult({ filters, totalResults, onResetPage, sx
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Keyword:" isShow={!!filters.state.query}>
+      <FiltersBlock label="검색어:" isShow={!!filters.state.query}>
         <Chip {...chipProps} label={filters.state.query} onDelete={handleRemoveKeyword} />
       </FiltersBlock>
     </FiltersResult>

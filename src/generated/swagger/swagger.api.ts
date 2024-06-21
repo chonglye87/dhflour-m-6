@@ -205,41 +205,6 @@ export interface RBoardCategory {
    * @format int64
    */
   id: number;
-  /** 제목 */
-  title: string;
-  /** 내용 */
-  content: string;
-  categories?: RBoardCategory[];
-}
-
-export interface RBoardCategory {
-  /**
-   * 등록시간
-   * @format date-time
-   */
-  createdAt: string;
-  /**
-   * 등록자
-   * @format int64
-   */
-  createdBy: number;
-  /**
-   * 수정시간
-   * @format date-time
-   */
-  updatedAt: string;
-  /**
-   * 수정자
-   * @format int64
-   */
-  updatedBy: number;
-  /**
-   * 버전
-   * @format int64
-   */
-  version: number;
-  /** @format int64 */
-  id?: number;
   /** 카테고리명 */
   name: string;
 }

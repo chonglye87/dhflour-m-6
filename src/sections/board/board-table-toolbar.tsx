@@ -1,23 +1,29 @@
+import type {IBoardFilters} from "src/types/board";
 import type {IDatePickerControl} from 'src/types/common';
 import type {UseSetStateReturn} from 'src/hooks/use-set-state';
+import type {RBoardCategory} from "src/generated/swagger/swagger.api";
 
 import {useCallback} from 'react';
 
 import Stack from '@mui/material/Stack';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
+import Checkbox from "@mui/material/Checkbox";
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
+import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from '@mui/material/InputAdornment';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {formHelperTextClasses} from '@mui/material/FormHelperText';
+import Select, {type SelectChangeEvent} from "@mui/material/Select";
 
 import {Iconify} from 'src/components/iconify';
 import {usePopover, CustomPopover} from 'src/components/custom-popover';
 
-import type {IBoardFilters} from "../../types/board";
+
+
 
 // ----------------------------------------------------------------------
 
@@ -26,12 +32,24 @@ type Props = {
   onResetPage: () => void;
   filters: UseSetStateReturn<IBoardFilters>;
   options: {
-    services: string[];
+    categories: RBoardCategory[];
   };
 };
 
 export function BoardTableToolbar({ filters, options, dateError, onResetPage }: Props) {
   const popover = usePopover();
+
+  const handleFilterCategory = useCallback(
+    (event: SelectChangeEvent<number[]>) => {
+      // Directly using event.target.value as number[]
+      const newValue = event.target.value as number[];
+
+      onResetPage();
+      filters.setState({ categoryIds: newValue });
+    },
+    [filters, onResetPage]
+  );
+
 
   const handleFilterName = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,32 +84,32 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
         sx={{ p: 2.5, pr: { xs: 2.5, md: 1 } }}
       >
         <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 180 } }}>
-          <InputLabel htmlFor="invoice-filter-service-select-label">Service</InputLabel>
+          <InputLabel htmlFor="invoice-filter-service-select-label">카테고리</InputLabel>
 
-          {/* <Select */}
-          {/*  multiple */}
-          {/*  value={filters.state.service} */}
-          {/*  onChange={handleFilterService} */}
-          {/*  input={<OutlinedInput label="Service" />} */}
-          {/*  renderValue={(selected) => selected.map((value) => value).join(', ')} */}
-          {/*  inputProps={{ id: 'invoice-filter-service-select-label' }} */}
-          {/*  sx={{ textTransform: 'capitalize' }} */}
-          {/* > */}
-          {/*  {options.services.map((option) => ( */}
-          {/*    <MenuItem key={option} value={option}> */}
-          {/*      <Checkbox */}
-          {/*        disableRipple */}
-          {/*        size="small" */}
-          {/*        checked={filters.state.service.includes(option)} */}
-          {/*      /> */}
-          {/*      {option} */}
-          {/*    </MenuItem> */}
-          {/*  ))} */}
-          {/* </Select> */}
+           <Select
+            multiple
+            value={filters.state.categoryIds}
+            onChange={handleFilterCategory}
+            input={<OutlinedInput label="카테고리" />}
+            renderValue={(selected) => selected.map((value) => value).join(', ')}
+            inputProps={{ id: 'invoice-filter-service-select-label' }}
+            sx={{ textTransform: 'capitalize' }}
+           >
+            {options.categories.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                <Checkbox
+                  disableRipple
+                  size="small"
+                  checked={filters.state.categoryIds.includes(option.id)}
+                />
+                {option.name}
+              </MenuItem>
+            ))}
+           </Select>
         </FormControl>
 
         <DatePicker
-          label="Start date"
+          label="등록일"
           value={filters.state.endTime}
           onChange={handleFilterStartDate}
           slotProps={{ textField: { fullWidth: true } }}
@@ -99,7 +117,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
         />
 
         <DatePicker
-          label="End date"
+          label="종료일"
           value={filters.state.endTime}
           onChange={handleFilterEndDate}
           slotProps={{
@@ -123,7 +141,7 @@ export function BoardTableToolbar({ filters, options, dateError, onResetPage }: 
             fullWidth
             value={filters.state.query}
             onChange={handleFilterName}
-            placeholder="Search customer or invoice number..."
+            placeholder="게시물을 검색하세요."
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

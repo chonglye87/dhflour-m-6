@@ -19,9 +19,10 @@ type ApplyFilterProps = {
   filters: UseSetStateReturn<IBoardFilters>;
   dateError: boolean;
 }
+
 const defaultFilters: IBoardFilters = {
   query: "",
-  categories: [],
+  categoryIds: [],
   startTime: null,
   endTime: null,
 };

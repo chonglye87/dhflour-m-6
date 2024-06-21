@@ -153,7 +153,7 @@ export function JwtSignInView() {
 
       <Box sx={{mb:3}}>
         <Alert severity="info">
-          테스트 계정 : wini@test.com / qwer1234!
+          테스트 계정 : test@gmail.com / Yuio1234!
         </Alert>
       </Box>
 

@@ -6,7 +6,7 @@ import {BoardListView} from "src/sections/board/view/board-list-view";
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Post list | Dashboard - ${CONFIG.site.name}` };
+const metadata = { title: `게시판 | Dashboard - ${CONFIG.site.name}` };
 
 export default function Page() {
   return (

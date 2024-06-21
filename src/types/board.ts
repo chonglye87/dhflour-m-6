@@ -3,7 +3,7 @@ import type {RBoardCategory} from "../generated/swagger/swagger.api";
 
 export type IBoardFilters = {
   query: string;
-  categories: RBoardCategory[];
+  categoryIds: number[];
   startTime: IDatePickerControl;
   endTime: IDatePickerControl;
 };

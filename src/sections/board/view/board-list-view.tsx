@@ -17,7 +17,6 @@ import {useBoolean} from 'src/hooks/use-boolean';
 
 import {fISO, fIsAfter, fIsBetween} from 'src/utils/format-time';
 
-import {INVOICE_SERVICE_OPTIONS} from 'src/_mock';
 import {DashboardContent} from 'src/layouts/dashboard';
 
 import {Iconify} from 'src/components/iconify';
@@ -93,14 +92,13 @@ export function BoardListView() {
       startTime: fISO(filters.state.startTime),
       endTime: fISO(filters.state.endTime),
       categoryIds:
-        filters.state.categories !== undefined
-          ? filters.state.categories
-            .map((category) => category.id)
-            .filter((id): id is number => typeof id === 'number')
+        filters.state.categoryIds !== undefined
+          ? filters.state.categoryIds
+            .filter((id): id is number => true)
           : []
     });
     console.log(table.rowsPerPage, 'table.rowsPerPage');
-    console.log(table.page + 1, 'table.page + 1');
+    console.log(table.page, 'table.page');
     console.log(data, 'board');
     setTableData(data.content || []);
     // table.setPageMetadata(data.metadata);
@@ -137,6 +135,7 @@ export function BoardListView() {
 
   const canReset =
     !!filters.state.query ||
+    filters.state.categoryIds.length > 0 ||
     (!!filters.state.startTime && !!filters.state.endTime);
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
@@ -196,7 +195,7 @@ export function BoardListView() {
     filters.state.query,
     filters.state.startTime,
     filters.state.endTime,
-    filters.state.categories
+    filters.state.categoryIds
   ]);
 
 
@@ -211,9 +210,9 @@ export function BoardListView() {
         <CustomBreadcrumbs
           heading="List"
           links={[
-            {name: 'Dashboard', href: paths.dashboard.root},
-            {name: 'Board', href: paths.dashboard.board},
-            {name: 'List'},
+            {name: '대시보드', href: paths.dashboard.root},
+            {name: '게시판', href: paths.dashboard.board},
+            {name: '목록'},
           ]}
           action={
             <Button
@@ -234,7 +233,7 @@ export function BoardListView() {
             filters={filters}
             dateError={dateError}
             onResetPage={table.onResetPage}
-            options={{services: INVOICE_SERVICE_OPTIONS.map((option) => option.name)}}
+            options={{categories}}
           />
 
           {canReset && (
